@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Tune Library ===
 Contributors: jackdewey
 Tags: iTunes, music, collection, list, XML
 Requires at least: 2.7
