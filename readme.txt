@@ -25,6 +25,10 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 1. In the Wordpress Admin, create a new page containing the following code:<br/>
    [tune-library]
 
+== Changelog ==
+
+1. 1.0.1: Added new option to display black or white expand and collapse icons
+
 == Frequently Asked Questions ==
 
 There are no FAQs at this time.

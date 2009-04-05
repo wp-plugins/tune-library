@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.0
+Version: 1.0.1
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -168,6 +168,8 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			if ( isset($_GET['reset']) && $_GET['reset'] == "true") {
 					$options['filename'] = 'iTunes Music Library.xml';
 					$options['albumartistpriority'] = false;
+					$options['iconcolor'] = 'black';
+					
 				update_option('TuneLibraryPP',$options);
 			}
 			if ( isset($_GET['flush']) && $_GET['flush'] == "true") {
@@ -262,7 +264,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 				if (!current_user_can('manage_options')) die(__('You cannot edit the Tune Library for WordPress options.'));
 				check_admin_referer('tunelibrarypp-config');
 				
-				foreach (array('filename') as $option_name) {
+				foreach (array('filename','iconcolor') as $option_name) {
 					if (isset($_POST[$option_name])) {
 						$options[$option_name] = $_POST[$option_name];
 					}
@@ -275,7 +277,6 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 						$options[$option_name] = false;
 					}
 				}
-
 				
 				update_option('TuneLibraryPP', $options);
 			}
@@ -305,7 +306,18 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 						<td>
 							<input type="checkbox" id="albumartistpriority" name="albumartistpriority" <?php if ($options['albumartistpriority']) echo ' checked="checked" '; ?>/>
 						</td>
-					</tr>					
+					</tr>
+					<tr>
+						<th scope="row" valign="top">
+							<label for="iconcolor">Expand/Collapse Icon Color</label>
+						</th>
+						<td>
+							<select name="iconcolor" id="flatlist" style="width:200px;">
+								<option value="black"<?php if ($options['iconcolor'] == false) { echo ' selected="selected"';} ?>>Black</option>
+								<option value="white"<?php if ($options['iconcolor'] == true) { echo ' selected="selected"';} ?>>White</option>
+							</select>
+						</td>
+					</tr>						
 					<tr>
 						<th scope="row" valign="top">
 							<label for="filename"><a href="?page=tune-library.php&amp;flush=true">Delete imported library</a></label>
@@ -339,6 +351,8 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 
 		function restore_defaults() {
 				$options['filename'] = 'iTunes Music Library.xml';
+				$options['albumartistpriority'] = false;
+				$options['iconcolor'] = 'black';
 	
 			update_option('TuneLibraryPP',$options);
 		}
@@ -396,12 +410,22 @@ function tune_library() {
     if ($albums) {
 	
 		$output .= "<!-- Tune Library Output -->";
+		$output .= "<div id=\"TuneLibrary\">";
 	
 		$output .= "<SCRIPT LANGUAGE=\"JavaScript\">\n";
 		$output .= "var plusImg = new Image();\n";
-		$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
+		
+		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
+		else if ($options['iconcolor'] == 'white')
+			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
+			
 		$output .= "var minusImg = new Image()\n";
-		$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
+		
+		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
+		else if ($options['iconcolor'] == 'white')
+			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
 		
 		$output .= "function showAlbums() {\n";
 		$output .= "\tif (document.getElementsByTagName)\n";
@@ -473,7 +497,14 @@ function tune_library() {
 	
        foreach ($albums as $album){
 			$output .= "\t<div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
-			$output .= "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath . "/plusbl.gif\"><b> " . $album->artist . "</b></a><br>\n\n";
+			$output .= "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
+			
+			if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+				$output .= "/plusbl.gif\"><b> ";
+			else if ($options['iconcolor'] == 'white')
+				$output .= "/plusbl-white.gif\"><b> ";
+ 
+			$output .= $album->artist . "</b></a><br>\n\n";
 						
 			if (!$options['albumartistpriority'])
 			{
@@ -502,7 +533,14 @@ function tune_library() {
 
 			
 				foreach ($albumslists as $albumlist){
-					$output .= "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath . "/plusbl.gif\"></a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
+					$output .= "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
+					
+					if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+						$output .= "/plusbl.gif\">";
+					else if ($options['iconcolor'] == 'white')
+						$output .= "/plusbl-white.gif\">";
+					
+					$output .= "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
 					
 					if (!$options['albumartistpriority'])
 						$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' order by tracknum";
@@ -552,6 +590,8 @@ function tune_library() {
 		}
        }
 	   
+	 $output .= "</div>";
+	   
 	 $output .= "<!-- Tune Library Output -->";
 	   
 	return $output;
@@ -564,6 +604,7 @@ $options  = get_option('TuneLibraryPP',"");
 if ($options == "") {
 	$options['filename'] = 'iTunes Music Library.xml';
 	$options['albumartistpriority'] = false;
+	$options['iconcolor'] = 'black';
 	
 	update_option('TuneLibraryPP',$options);
 } 
