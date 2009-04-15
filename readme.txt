@@ -1,8 +1,9 @@
 === Tune Library ===
 Contributors: jackdewey
+Donate link: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Tags: iTunes, music, collection, list, XML
 Requires at least: 2.7
-Tested up to: 2.7
+Tested up to: 2.7.1
 Stable tag: trunk
 
 The purpose of this plugin is to allow users to import their iTunes music list into Wordpress and print their song collection in a page.
@@ -27,6 +28,7 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+1. 1.1: Changed main function structure to print data directly as it parses track list instead of building large string in memory. This allows Tune Library to support large iTunes libraries.
 1. 1.0.1: Added new option to display black or white expand and collapse icons
 
 == Frequently Asked Questions ==

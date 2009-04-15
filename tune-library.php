@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.0.1
+Version: 1.1
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -366,7 +366,7 @@ function tune_library_func($atts) {
 	extract(shortcode_atts(array(
 	), $atts));
 
-	return tune_library();
+	tune_library();
 }
 
 
@@ -409,102 +409,102 @@ function tune_library() {
 
     if ($albums) {
 	
-		$output .= "<!-- Tune Library Output -->";
-		$output .= "<div id=\"TuneLibrary\">";
+		echo "<!-- Tune Library Output -->";
+		echo "<div id=\"TuneLibrary\">";
 	
-		$output .= "<SCRIPT LANGUAGE=\"JavaScript\">\n";
-		$output .= "var plusImg = new Image();\n";
+		echo "<SCRIPT LANGUAGE=\"JavaScript\">\n";
+		echo "var plusImg = new Image();\n";
 		
 		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
+			echo "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
 		else if ($options['iconcolor'] == 'white')
-			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
+			echo "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
 			
-		$output .= "var minusImg = new Image()\n";
+		echo "var minusImg = new Image()\n";
 		
 		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
+			echo "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
 		else if ($options['iconcolor'] == 'white')
-			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
+			echo "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
 		
-		$output .= "function showAlbums() {\n";
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('div');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('div');\n\n";
+		echo "function showAlbums() {\n";
+		echo "\tif (document.getElementsByTagName)\n";
+		echo "\t\tx = document.getElementsByTagName('div');\n";
+		echo "\telse if (document.all)\n";
+		echo "\t\tx = document.all.tags('div');\n\n";
 		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
-		$output .= "\t\t\tx[i].style.display = \"\";\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n\n";
+		echo "\tfor (var i=0;i<x.length;i++)\n";
+		echo "\t{\n";
+		echo "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
+		echo "\t\t\tx[i].style.display = \"\";\n";
+		echo "\t\t}\n";
+		echo "\t}\n\n";
 		
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('img');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('img');\n\n";
+		echo "\tif (document.getElementsByTagName)\n";
+		echo "\t\tx = document.getElementsByTagName('img');\n";
+		echo "\telse if (document.all)\n";
+		echo "\t\tx = document.all.tags('img');\n\n";
 		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
-		$output .= "\t\t\tx[i].src = minusImg.src;\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n";
-		$output .= "}\n\n";
+		echo "\tfor (var i=0;i<x.length;i++)\n";
+		echo "\t{\n";
+		echo "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
+		echo "\t\t\tx[i].src = minusImg.src;\n";
+		echo "\t\t}\n";
+		echo "\t}\n";
+		echo "}\n\n";
 		
-		$output .= "function hideAlbums() {\n";
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('div');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('div');\n\t";
+		echo "function hideAlbums() {\n";
+		echo "\tif (document.getElementsByTagName)\n";
+		echo "\t\tx = document.getElementsByTagName('div');\n";
+		echo "\telse if (document.all)\n";
+		echo "\t\tx = document.all.tags('div');\n\t";
 		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
-		$output .= "\t\t\tx[i].style.display = \"none\"\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n\n";
+		echo "\tfor (var i=0;i<x.length;i++)\n";
+		echo "\t{\n";
+		echo "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
+		echo "\t\t\tx[i].style.display = \"none\"\n";
+		echo "\t\t}\n";
+		echo "\t}\n\n";
 		
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('img');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('img');\n\n";
+		echo "\tif (document.getElementsByTagName)\n";
+		echo "\t\tx = document.getElementsByTagName('img');\n";
+		echo "\telse if (document.all)\n";
+		echo "\t\tx = document.all.tags('img');\n\n";
 		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
-		$output .= "\t\t\tx[i].src = plusImg.src;\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n";
-		$output .= "}\n\n";
+		echo "\tfor (var i=0;i<x.length;i++)\n";
+		echo "\t{\n";
+		echo "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
+		echo "\t\t\tx[i].src = plusImg.src;\n";
+		echo "\t\t}\n";
+		echo "\t}\n";
+		echo "}\n\n";
 		
-		$output .= "function showLevel( _levelId, _imgId ) {\n";
-		$output .= "\tvar thisLevel = document.getElementById( _levelId );\n";
-		$output .= "\tvar thisImg = document.getElementById( _imgId );\n";
-		$output .= "\tif ( thisLevel.style.display == \"none\") {\n";
-		$output .= "\t\tthisLevel.style.display = \"\";\n";
-		$output .= "\t\tthisImg.src = minusImg.src;\n";
-		$output .= "\t}\n";
-		$output .= "\telse {\n";
-		$output .= "\t\tthisLevel.style.display = \"none\";\n";
-		$output .= "\t\tthisImg.src = plusImg.src;\n";
-		$output .= "\t}\n";
-		$output .= "}\n\n";
+		echo "function showLevel( _levelId, _imgId ) {\n";
+		echo "\tvar thisLevel = document.getElementById( _levelId );\n";
+		echo "\tvar thisImg = document.getElementById( _imgId );\n";
+		echo "\tif ( thisLevel.style.display == \"none\") {\n";
+		echo "\t\tthisLevel.style.display = \"\";\n";
+		echo "\t\tthisImg.src = minusImg.src;\n";
+		echo "\t}\n";
+		echo "\telse {\n";
+		echo "\t\tthisLevel.style.display = \"none\";\n";
+		echo "\t\tthisImg.src = plusImg.src;\n";
+		echo "\t}\n";
+		echo "}\n\n";
 		
-		$output .= "</SCRIPT>\n\n";
+		echo "</SCRIPT>\n\n";
 	
 	
        foreach ($albums as $album){
-			$output .= "\t<div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
-			$output .= "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
+			echo "\t<div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
+			echo "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
 			
 			if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-				$output .= "/plusbl.gif\"><b> ";
+				echo "/plusbl.gif\"><b> ";
 			else if ($options['iconcolor'] == 'white')
-				$output .= "/plusbl-white.gif\"><b> ";
+				echo "/plusbl-white.gif\"><b> ";
  
-			$output .= $album->artist . "</b></a><br>\n\n";
+			echo $album->artist . "</b></a><br>\n\n";
 						
 			if (!$options['albumartistpriority'])
 			{
@@ -529,18 +529,18 @@ function tune_library() {
 			
 			if ($albumslists) {
 			
-				$output .= "\t\t<div class=AlbumListHeader id=Set" . $artistnumber . " style='display:none'>\n";
+				echo "\t\t<div class=AlbumListHeader id=Set" . $artistnumber . " style='display:none'>\n";
 
 			
 				foreach ($albumslists as $albumlist){
-					$output .= "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
+					echo "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
 					
 					if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-						$output .= "/plusbl.gif\">";
+						echo "/plusbl.gif\">";
 					else if ($options['iconcolor'] == 'white')
-						$output .= "/plusbl-white.gif\">";
+						echo "/plusbl-white.gif\">";
 					
-					$output .= "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
+					echo "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
 					
 					if (!$options['albumartistpriority'])
 						$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' order by tracknum";
@@ -556,45 +556,44 @@ function tune_library() {
 					
 					if ($tracklists) {
 					
-						$output .= "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
+						echo "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
 						
 						foreach ($tracklists as $tracklist){
 							if (!$options['albumartistpriority'])
 							{
-								$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+								echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
 							}
 							else
 							{
 								if ($album->source == "artist")
-									$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+									echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
 								else
-									$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
+									echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
 							}
 						
 						}
 						
-						$output .= "\t\t\t\t</div>\n";
+						echo "\t\t\t\t</div>\n";
 					
 					}
 					
-					$output .= "\t\t\t</div>\n";
+					echo "\t\t\t</div>\n";
 
 					$albumnumber = $albumnumber + 1;
 				
 				}
 				
-				$output .= "\t\t</div>\n\t</div>\n";
+				echo "\t\t</div>\n\t</div>\n";
 			} 
 			
 			$artistnumber = $artistnumber + 1;
 		}
        }
 	   
-	 $output .= "</div>";
+	 echo "</div>";
 	   
-	 $output .= "<!-- Tune Library Output -->";
+	 echo "<!-- Tune Library Output -->";
 	   
-	return $output;
 }
 
 $version = "1.0";
