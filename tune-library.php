@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.2
+Version: 1.2.1
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -398,7 +398,19 @@ function tune_library() {
 			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' order by artist";
 		else
 			{
-				if ($artistletter == '') $artistletter = 'A';
+				if ($artistletter == '')
+					{
+						$lowestletterquery = "SELECT min( substring( artist, 1, 1 ) ) as letter FROM " . $wpdb->prefix . "tracks where artist != ''";
+						$lowestletters = $wpdb->get_results($lowestletterquery);
+						
+						if ($lowestletters)
+						{
+						   foreach ($lowestletters as $lowestletter){
+								$artistletter = $lowestletter->letter;
+						   }
+						}												
+					}
+					
 				$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and artist like '" .$artistletter . "%' order by artist";
 			}
 		$albums = $wpdb->get_results($querystr);
@@ -406,27 +418,26 @@ function tune_library() {
 	else
 	{
 		if ($options['oneletter'] == false || $showallartists == true)		
-			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) order by artist";
+			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
 		else
 			{
-				if ($artistletter == '') $artistletter = 'A';
-				$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%' order by artist";			
+				if ($artistletter == '')
+					{
+						$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->prefix . "tracks where albumartist != '' and artist != albumartist))as FirstGroup";
+						$lowestletters = $wpdb->get_results($lowestletterquery);
+						
+						if ($lowestletters)
+						{
+						   foreach ($lowestletters as $lowestletter){
+								$artistletter = $lowestletter->letter;
+						   }
+						}			
+					}
+				
+				$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%') order by artist";			
 			}
-		$firstartists = $wpdb->get_results($querystr);
-		
-		if ($options['oneletter'] == false || $showallartists == true)		
-			$albumartistsquery = "SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist order by albumartist";
-		else
-			{
-				if ($artistletter == '') $artistletter = 'A';
-				$albumartistsquery = "SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%' order by albumartist";
-			}
-		$albumartists = $wpdb->get_results($albumartistsquery);
-		
-		$albums = array_merge($firstartists, $albumartists);
-		
-		sort($albums);
-	
+		$albums = $wpdb->get_results($querystr);
+			
 	} 
 	
 	// Pre-2.6 compatibility
