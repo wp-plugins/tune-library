@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.2.1
+Version: 1.3
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -170,6 +170,12 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 					$options['albumartistpriority'] = false;
 					$options['iconcolor'] = 'black';
 					$options['oneletter'] = false;
+					$options['useDHTML'] = false;
+					$options['loadingicon'] = 'Ajax-loader.gif';
+					$options['buildmenufromitems'] = false;
+					$options['displayshowall'] = false;
+					$options['defaultlettertodisplay'] = '';
+					$options['groupnonalphaentries'] = false;
 					
 				update_option('TuneLibraryPP',$options);
 			}
@@ -265,18 +271,25 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 				if (!current_user_can('manage_options')) die(__('You cannot edit the Tune Library for WordPress options.'));
 				check_admin_referer('tunelibrarypp-config');
 				
-				foreach (array('filename','iconcolor') as $option_name) {
+				foreach (array('filename','iconcolor','loadingicon','defaultlettertodisplay') as $option_name) {
 					if (isset($_POST[$option_name])) {
 						$options[$option_name] = $_POST[$option_name];
 					}
 				}
 				
-				foreach (array('albumartistpriority', 'oneletter') as $option_name) {
+				foreach (array('albumartistpriority', 'oneletter', 'useDHTML', 'displayshowall','groupnonalphaentries') as $option_name) {
 					if (isset($_POST[$option_name])) {
 						$options[$option_name] = true;
 					} else {
 						$options[$option_name] = false;
 					}
+				}
+				
+				if ($_POST['buildmenufromitems'] == 'true') {
+					$options['buildmenufromitems'] = true;
+				} 
+				else if ($_POST['buildmenufromitems'] == 'false') {
+					$options['buildmenufromitems'] = false;
 				}
 				
 				update_option('TuneLibraryPP', $options);
@@ -315,7 +328,32 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 						<td>
 							<input type="checkbox" id="oneletter" name="oneletter" <?php if ($options['oneletter']) echo ' checked="checked" '; ?>/>
 						</td>
-					</tr>					
+					</tr>
+					<tr>
+						<th scope="row" valign="top">
+							<label for="defaultlettertodisplay">Letter to be shown by default (selects first available if empty)</label>
+						</th>
+						<td>
+							<input type="text" id="defaultlettertodisplay" name="defaultlettertodisplay" size="1" value="<?php echo strval($options['defaultlettertodisplay']); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;"/>
+						</td>
+					</tr>	
+					
+					<tr>
+						<th scope="row" valign="top">
+							<label for="useDHTML">Use AJAX Queries (Useful for larger music collections)</label>
+						</th>
+						<td>
+							<input type="checkbox" id="useDHTML" name="useDHTML" <?php if ($options['useDHTML']) echo ' checked="checked" '; ?>/>
+						</td>
+					</tr>						
+					<tr>
+						<th scope="row" valign="top">
+							<label for="loadingicon">Icon to display when performing AJAX queries (default is Ajax-loader.gif)</label>
+						</th>
+						<td>
+							<input type="text" id="loadingicon" name="loadingicon" size="40" value="<?php echo strval($options['loadingicon']); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;"/>
+						</td>
+					</tr>						
 					<tr>
 						<th scope="row" valign="top">
 							<label for="iconcolor">Expand/Collapse Icon Color</label>
@@ -326,7 +364,34 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 								<option value="white"<?php if ($options['iconcolor'] == true) { echo ' selected="selected"';} ?>>White</option>
 							</select>
 						</td>
-					</tr>						
+					</tr>					
+					<tr>
+						<th scope="row" valign="top">
+							<label for="buildmenufromitems">Navigation Menu Content</label>
+						</th>
+						<td>
+							<select name="buildmenufromitems" id="flatlist" style="width:400px;">
+								<option value="false"<?php if ($options['buildmenufromitems'] == false) { echo ' selected="selected"';} ?>>Display full alphabet</option>
+								<option value="true"<?php if ($options['buildmenufromitems'] == true) { echo ' selected="selected"';} ?>>Only display letters for items in collection</option>
+							</select>
+						</td>
+					</tr>					
+					<tr>
+						<th scope="row" valign="top">
+							<label for="displayshowall">Display "Show All" in Navigation Menu</label>
+						</th>
+						<td>
+							<input type="checkbox" id="displayshowall" name="displayshowall" <?php if ($options['displayshowall']) echo ' checked="checked" '; ?>/>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row" valign="top">
+							<label for="groupnonalphaentries">Group Non-Alphabetic Entries</label>
+						</th>
+						<td>
+							<input type="checkbox" id="groupnonalphaentries" name="groupnonalphaentries" <?php if ($options['groupnonalphaentries']) echo ' checked="checked" '; ?>/>
+						</td>
+					</tr>					
 					<tr>
 						<th scope="row" valign="top">
 							<label for="filename"><a href="?page=tune-library.php&amp;flush=true">Delete imported library</a></label>
@@ -363,6 +428,12 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 				$options['albumartistpriority'] = false;
 				$options['iconcolor'] = 'black';
 				$options['oneletter'] = false;
+				$options['useDHTML'] = false;
+				$options['loadingicon'] = 'Ajax-loader.gif';
+				$options['buildmenufromitems'] = false;
+				$options['displayshowall'] = false;
+				$options['defaultlettertodisplay'] = '';
+				$options['groupnonalphaentries'] = false;
 	
 			update_option('TuneLibraryPP',$options);
 		}
@@ -391,54 +462,6 @@ function tune_library() {
 	$artistletter  = get_query_var('artistletter');
 	
 	$showallartists = get_query_var('showallartists');
-		
- 	if (!$options['albumartistpriority'])
-	{ 
-		if ($options['oneletter'] == false || $showallartists == true)
-			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' order by artist";
-		else
-			{
-				if ($artistletter == '')
-					{
-						$lowestletterquery = "SELECT min( substring( artist, 1, 1 ) ) as letter FROM " . $wpdb->prefix . "tracks where artist != ''";
-						$lowestletters = $wpdb->get_results($lowestletterquery);
-						
-						if ($lowestletters)
-						{
-						   foreach ($lowestletters as $lowestletter){
-								$artistletter = $lowestletter->letter;
-						   }
-						}												
-					}
-					
-				$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and artist like '" .$artistletter . "%' order by artist";
-			}
-		$albums = $wpdb->get_results($querystr);
-	}
-	else
-	{
-		if ($options['oneletter'] == false || $showallartists == true)		
-			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
-		else
-			{
-				if ($artistletter == '')
-					{
-						$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->prefix . "tracks where albumartist != '' and artist != albumartist))as FirstGroup";
-						$lowestletters = $wpdb->get_results($lowestletterquery);
-						
-						if ($lowestletters)
-						{
-						   foreach ($lowestletters as $lowestletter){
-								$artistletter = $lowestletter->letter;
-						   }
-						}			
-					}
-				
-				$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%') order by artist";			
-			}
-		$albums = $wpdb->get_results($querystr);
-			
-	} 
 	
 	// Pre-2.6 compatibility
 	if ( !defined('WP_CONTENT_URL') )
@@ -448,11 +471,8 @@ function tune_library() {
 
 	// Guess the location
 		$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
-
-
-    if ($albums) {
-	
-		echo "<!-- Tune Library Output -->";
+		
+			echo "<!-- Tune Library Output -->";
 		echo "<div id=\"TuneLibrary\">";
 	
 		echo "<SCRIPT LANGUAGE=\"JavaScript\">\n";
@@ -538,133 +558,257 @@ function tune_library() {
 		echo "</SCRIPT>\n\n";
 		
 		
+		
+ 	if (!$options['albumartistpriority'])
+	{ 
+		if ($options['oneletter'] == false || $showallartists == true)
+			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' order by artist";
+		else
+			{
+				if ($artistletter == '' && $options['defaultlettertodisplay'] == '')
+					{
+						$lowestletterquery = "SELECT min( substring( artist, 1, 1 ) ) as letter FROM " . $wpdb->prefix . "tracks where artist != ''";
+						$lowestletters = $wpdb->get_results($lowestletterquery);
+						
+						if ($lowestletters)
+						{
+						   foreach ($lowestletters as $lowestletter){
+								$artistletter = $lowestletter->letter;
+						   }
+						}												
+					}
+				else if ($artistletter == '' && $options['defaultlettertodisplay'] != '')
+					$artistletter = $options['defaultlettertodisplay'];
+					
+				$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and artist like '" .$artistletter . "%' order by artist";
+			}
+		$albums = $wpdb->get_results($querystr);
+	}
+	else
+	{
+		if ($options['oneletter'] == false || $showallartists == true)		
+			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
+		else
+			{
+				if ($artistletter == '' && $options['defaultlettertodisplay'] == '')
+					{
+						$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->prefix . "tracks where albumartist != '' and artist != albumartist))as FirstGroup";
+						$lowestletters = $wpdb->get_results($lowestletterquery);
+						
+						if ($lowestletters)
+						{
+						   foreach ($lowestletters as $lowestletter){
+								$artistletter = $lowestletter->letter;
+						   }
+						}			
+					}
+				else if ($artistletter == '' && $options['defaultlettertodisplay'] != '')
+					$artistletter = $options['defaultlettertodisplay'];
+				
+				$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%') order by artist";			
+			}
+		$albums = $wpdb->get_results($querystr);
+			
+	} 
+
+    if ($albums) {		
+		
+			// Code for navigation menu at top of page
+			
 			if ($options['oneletter'] == true)
-				echo "\t<div class=LetterSelector>Show Artists by Letter";
+				echo "\t<div class=LetterSelector>Show Letter ";
 			else
-				echo "\t<div class=LetterSelector>Jump to Letter";
+				echo "\t<div class=LetterSelector>Jump to Letter ";
 			
 			if (!$options['albumartistpriority'])
 			{
-				$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM `wp_tracks` WHERE artist is not null order by artist) artists group by substring(artist, 1, 1)";
+				$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null order by artist) artists group by substring(artist, 1, 1)";
 				
 			}
 			else
 			{
-				$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM `wp_tracks` WHERE artist is not null and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist FROM `wp_tracks` WHERE albumartist is not null and artist != albumartist order by artist) ) artists group by substring(artist, 1, 1)";
+				$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist order by artist) ) artists group by substring(artist, 1, 1)";
 			}
 			
 			$artistletters = $wpdb->get_results($letterquery);
-			
-			if ($artistletters)
+				
+			if ($artistletters && $options['buildmenufromitems'] == true)
 				{
 					foreach ($artistletters as $artistletter){
 						if ($options['oneletter'] == true)
-							echo '<a href="?artistletter=' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
+						{
+							if ($options['useDHTML'] == true)
+								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$artistletter->letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a> ";
+							else
+								echo '<a href="?artistletter=' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
+						}
 						else
 							echo '<a href="#' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
 					}
 				
-				}	
-			if ($options['oneletter'] == true)
+				}
+			else {
+				$letters = array();
+				foreach($artistletters as $letter){
+					$letters[strtoupper($letter->letter)]=array();
+					array_push($letters[strtoupper($letter->letter)], strtoupper($letter->letter));
+					array_push($letters[strtoupper($letter->letter)], $letter->count);
+				}
+				
+				echo '<span class=emptyletter>#</span>';
+	
+				foreach (range('A', 'Z') as $letter) {
+					if (array_key_exists($letter, $letters)) {
+						if($letters[$letter][1] > 1){
+							echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters[$letter][1]." Artists'>$letter</a> ";
+						}
+						else
+						{
+							echo "<a href='?letter=".$letter."' title='".$letters[$letter][1]." Artist'>$letter</a> ";
+						}
+					}
+					else
+					{
+						echo "<span class=emptyletter>" . $letter . "</span>";
+					}
+				}		
+			}
+				
+			if ($options['oneletter'] == true && $options['useDHTML'] == false && $options['displayshowall'] == true)
 				echo '<a href="?showallartists=true">Show All</a>';
+			else if ($options['oneletter'] == true && $options['useDHTML'] == true && $options['displayshowall'] == true)
+				echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='Show all'>Show All</a> ";
+				
+			echo "<div id='contentLoading' style='display: none;'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></div>";
 
 			echo "</div>";
 			
-	
+		echo "\n<ul id=\"dhtmlgoodies_tree\" class=\"dhtmlgoodies_tree\">\n";
+		$count = 1;
+		
+		$currentletter = '';
+		
        foreach ($albums as $album){
-			echo "\t<div id=" . substr($album->artist, 0, 1) . "><div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
-			echo "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
-			
-			if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-				echo "/plusbl.gif\"><b> ";
-			else if ($options['iconcolor'] == 'white')
-				echo "/plusbl-white.gif\"><b> ";
- 
-			echo $album->artist . "</b></a><br>\n\n";
-						
-			if (!$options['albumartistpriority'])
+
+			if ($currentletter != substr($album->artist, 0, 1))
+					echo '<a name="' . substr($album->artist, 0, 1) . '">';
+	   
+			if ($options['useDHTML'] == true)
 			{
-				$secondquerystr ="SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE artist = '" . mysql_real_escape_string($album->artist) . "' order by album";
-				$albumslists = $wpdb->get_results($secondquerystr); 
+	   		
+				echo "<li><a href='#' id='".urlencode('node_'.$count)."'> ".$album->artist."</a>";
+				if ($album->source == "artist")
+					echo "<ul><li parentId=\"artist::".urlencode($album->artist)."\"><a href='#' id='node_2'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></a></li></ul></li>";
+				else
+					echo "<ul><li parentId=\"albumartist::".urlencode($album->artist)."\"><a href='#' id='node_2'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></a></li></ul></li>";
+							
+				$count++;
+					
+								
 			}
 			else
-			{
-				if ($album->source == "artist")
+			{	
+			
+				echo "\t<div id=" . substr($album->artist, 0, 1) . "><div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
+				echo "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
+				
+				if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+					echo "/plusbl.gif\"><b> ";
+				else if ($options['iconcolor'] == 'white')
+					echo "/plusbl-white.gif\"><b> ";
+	 
+				echo $album->artist . "</b></a><br>\n\n";
+							
+				if (!$options['albumartistpriority'])
 				{
-					$secondquerystr = "SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE artist = '" . mysql_real_escape_string($album->artist) . "' and (artist = albumartist or albumartist is NULL) order by album";
+					$secondquerystr ="SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE artist = '" . mysql_real_escape_string($album->artist) . "' order by album";
 					$albumslists = $wpdb->get_results($secondquerystr); 
 				}
 				else
 				{
-					$secondquerystr ="SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE albumartist = '" . mysql_real_escape_string($album->artist) . "' order by album";
-					$albumslists = $wpdb->get_results($secondquerystr); 
-				}
-				
-								
-			}
-			
-			if ($albumslists) {
-			
-				echo "\t\t<div class=AlbumListHeader id=Set" . $artistnumber . " style='display:none'>\n";
-
-			
-				foreach ($albumslists as $albumlist){
-					echo "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
-					
-					if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-						echo "/plusbl.gif\">";
-					else if ($options['iconcolor'] == 'white')
-						echo "/plusbl-white.gif\">";
-					
-					echo "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
-					
-					if (!$options['albumartistpriority'])
-						$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' order by tracknum";
+					if ($album->source == "artist")
+					{
+						$secondquerystr = "SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE artist = '" . mysql_real_escape_string($album->artist) . "' and (artist = albumartist or albumartist is NULL) order by album";
+						$albumslists = $wpdb->get_results($secondquerystr); 
+					}
 					else
 					{
-						if ($album->source == "artist")
-							$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' and artist = '" . $album->artist . "' order by tracknum";
-						else
-							$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' and albumartist = '" . $album->artist . "' order by tracknum";
+						$secondquerystr ="SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE albumartist = '" . mysql_real_escape_string($album->artist) . "' order by album";
+						$albumslists = $wpdb->get_results($secondquerystr); 
 					}
-						
-					$tracklists = $wpdb->get_results($thirdquerystr); 
 					
-					if ($tracklists) {
-					
-						echo "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
+									
+				}
+				
+				if ($albumslists) {
+				
+					echo "\t\t<div class=AlbumListHeader id=Set" . $artistnumber . " style='display:none'>\n";
+
+				
+					foreach ($albumslists as $albumlist){
+						echo "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
 						
-						foreach ($tracklists as $tracklist){
-							if (!$options['albumartistpriority'])
-							{
-								echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
-							}
+						if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+							echo "/plusbl.gif\">";
+						else if ($options['iconcolor'] == 'white')
+							echo "/plusbl-white.gif\">";
+						
+						echo "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
+						
+						if (!$options['albumartistpriority'])
+							$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' order by tracknum";
+						else
+						{
+							if ($album->source == "artist")
+								$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' and artist = '" . $album->artist . "' order by tracknum";
 							else
-							{
-								if ($album->source == "artist")
+								$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' and albumartist = '" . $album->artist . "' order by tracknum";
+						}
+							
+						$tracklists = $wpdb->get_results($thirdquerystr); 
+						
+						if ($tracklists) {
+						
+							echo "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
+							
+							foreach ($tracklists as $tracklist){
+								if (!$options['albumartistpriority'])
+								{
 									echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+								}
 								else
-									echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
+								{
+									if ($album->source == "artist")
+										echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+									else
+										echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
+								}
+							
 							}
+							
+							echo "\t\t\t\t</div>\n";
 						
 						}
 						
-						echo "\t\t\t\t</div>\n";
+						echo "\t\t\t</div>\n";
+
+						$albumnumber = $albumnumber + 1;
 					
 					}
 					
-					echo "\t\t\t</div>\n";
-
-					$albumnumber = $albumnumber + 1;
+					echo "\t\t</div>\n\t</div></div>\n";
+				} 
 				
-				}
-				
-				echo "\t\t</div>\n\t</div></div>\n";
-			} 
+			
+			}
 			
 			$artistnumber = $artistnumber + 1;
-		}
+			
+			}
+			
        }
+	   
+	 echo '</ul>'; 
 	     
 	 echo "</div>";
 	   
@@ -681,9 +825,20 @@ if ($options == "") {
 	$options['albumartistpriority'] = false;
 	$options['iconcolor'] = 'black';
 	$options['oneletter'] = false;
+	$options['useDHTML'] = false;
+	$options['loadingicon'] = 'Ajax-loader.gif';
+	$options['buildmenufromitems'] = false;
+	$options['displayshowall'] = false;
+	$options['defaultlettertodisplay'] = '';
+	$options['groupnonalphaentries'] = false;
 	
 	update_option('TuneLibraryPP',$options);
-} 
+}
+else
+if ($options['loadingicon'] == '')
+{
+	$options['loadingicon'] = 'Ajax-loader.gif';
+}
 
 
 function tune_library_queryvars( $qvars )
@@ -693,12 +848,25 @@ function tune_library_queryvars( $qvars )
   return $qvars;
 }
 
+function tune_library_header() {
+	echo '<link rel="stylesheet" type="text/css" media="screen" href="'. WP_PLUGIN_URL . '/tune-library/css/folder-tree-static.css"/>';
+	echo '<link rel="stylesheet" type="text/css" media="screen" href="'. WP_PLUGIN_URL . '/tune-library/css/context-menu.css"/>';
+		
+}
+
+function tune_library_init() {
+	wp_enqueue_script('ajax', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/ajax.js');
+	wp_enqueue_script('folder-tree-static', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/folder-tree-static.js.php');
+}    
 
 // adds the menu item to the admin interface
 add_action('admin_menu', array('TL_Admin','add_config_page'));
 
 add_filter('query_vars', 'tune_library_queryvars' );
 
+add_action('wp_head', 'tune_library_header');
 
 add_shortcode('tune-library', 'tune_library_func');
+
+add_action('init', 'tune_library_init');
 ?>

@@ -1,0 +1,60 @@
+	/* Styles used in DHTML query mode */
+	
+	p{
+		font-family:arial;
+		
+	}
+	a{
+		font-family:arial;
+		font-size:1.0em;
+	}
+	
+	.dhtmlgoodies_tree{
+		margin:0px;
+		padding:0px;
+	}
+	.dhtmlgoodies_tree ul{	/* Sub menu groups */
+		margin-left:10px;	/* Left spacing */
+		padding-left:0px;
+		display:none;	/* Initially hide sub nodes */
+	}
+	.dhtmlgoodies_tree li{	/* Nodes */
+		list-style-type:none;
+		vertical-align:middle;
+		
+	}
+	.dhtmlgoodies_tree li a{	/* Node links */
+		font-family:arial;
+		font-size:1.0em;
+		padding-left:2px;
+	}
+	
+	
+	/* Styles used in regular query mode */
+	
+	.ArtistHeader{
+	padding-left:20px;
+	margin: 6px 0px 6px 0px;
+}
+
+.AlbumTitle {
+	padding-left: 20px;
+	margin: 6px 0px 6px 0px;
+}
+
+.AlbumListHeader {
+	padding-left: 20px;
+	margin: 6px 10px 6px 10px;
+}
+
+.TrackList{
+	padding-left: 20px;
+	margin: 5px 0px 5px 0px;
+}
+
+.LetterSelector a { margin-left: 5px; }
+.emptyletter { margin-left: 5px; }
+
+
+#TuneLibrary img { border:0px; padding:0px !important; padding:0;}
+	
