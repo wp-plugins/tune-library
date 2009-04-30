@@ -15,7 +15,7 @@ if(isset($_GET['parentId'])){
 		foreach($tracks as $track){
 			echo "<li><a href='#'> ".$track->album."</a>
 				<ul>
-					<li parentId='album::".urlencode($itemData)."::".urlencode($track->album)."'><a href='#'>Loading</a></li>
+					<li parentId='album::".urlencode($itemData)."::".urlencode($track->album)."'><a href='#'>Loading...</a></li>
 				</ul>			
 			</li>";
 		}
@@ -29,7 +29,7 @@ if(isset($_GET['parentId'])){
 		foreach($tracks as $track){
 			echo "<li><a href='#'> ".$track->album."</a>
 				<ul>
-					<li parentId='albumvarious::".urlencode($itemData)."::".urlencode($track->album)."'><a href='#'>Loading</a></li>
+					<li parentId='albumvarious::".urlencode($itemData)."::".urlencode($track->album)."'><a href='#'>Loading...</a></li>
 				</ul>			
 			</li>";
 		}
