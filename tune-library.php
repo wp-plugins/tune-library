@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.3.1
+Version: 1.3.2
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -756,7 +756,7 @@ function tune_library() {
 			else if ($options['oneletter'] == true && $options['useDHTML'] == true && $options['displayshowall'] == true)
 				echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='Show all'>Show All</a>";
 				
-			echo "<div id='contentLoading' style='display: none;'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></div>";
+			echo "<span class='contentLoading' id='contentLoading' style='display: none;'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' alt='Loading data, please wait...'></span>";
 
 			echo "</div>";
 			

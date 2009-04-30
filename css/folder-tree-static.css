@@ -28,6 +28,11 @@
 		font-size:1.0em;
 		padding-left:2px;
 	}
+
+	#contentLoading {
+		margin-top: 16px;
+		padding-left: 10px;
+	}
 	
 	
 	/* Styles used in regular query mode */

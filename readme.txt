@@ -30,7 +30,8 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
-1. 1.3.1 Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
+1. 1.3.2: Changed code around Loading Icon styling
+1. 1.3.1: Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
 1. 1.3: Development version released by mistake
 1. 1.2.1: Changed code for default letter shown in filter mode. Was previously hard-coded to A. Now shows appropriate first letter
 1. 1.2: Added new functionality to only show artists whose names start with a single letter at a time to accomodate large collections. Added alphabetical list for regular library display to jump to a specific letter quickly.
