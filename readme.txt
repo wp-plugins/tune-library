@@ -1,14 +1,14 @@
 === Tune Library ===
 Contributors: jackdewey
 Donate link: http://yannickcorner.nayanna.biz/wordpress-plugins/
-Tags: iTunes, music, collection, list, XML
+Tags: iTunes, music, collection, list, XML, AJAX
 Requires at least: 2.7
 Tested up to: 2.7.1
-Stable tag: 1.2
+Stable tag: trunk
 
 The purpose of this plugin is to allow users to import their iTunes music list into Wordpress and print their song collection in a page.
 
-Added new functionality in version 1.2 to only show artists whose names start with a single letter at a time to accomodate large collections.
+Users can choose to only show artists whose names start with a single letter at a time to accomodate large collections. Tune Library also features an AJAX-based query mode to avoid refreshing the page for every query and to only request data when required from the database.
 
 == Description ==
 
@@ -30,6 +30,8 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+1. 1.3.1 Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
+1. 1.3: Development version released by mistake
 1. 1.2.1: Changed code for default letter shown in filter mode. Was previously hard-coded to A. Now shows appropriate first letter
 1. 1.2: Added new functionality to only show artists whose names start with a single letter at a time to accomodate large collections. Added alphabetical list for regular library display to jump to a specific letter quickly.
 1. 1.1: Changed main function structure to print data directly as it parses track list instead of building large string in memory. This allows Tune Library to support large iTunes libraries.
