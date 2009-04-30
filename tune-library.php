@@ -573,7 +573,15 @@ function tune_library() {
 						if ($lowestletters)
 						{
 						   foreach ($lowestletters as $lowestletter){
-								$artistletter = $lowestletter->letter;
+								if ($options['groupnonalphaentries'] == true)
+								{
+									if ($lowestletter->letter < 'A' || $lowestletter->letter > 'Z')
+										$artistletter = '#';
+									else
+										$artistletter = $lowestletter->letter;
+								}
+								else
+									$artistletter = $lowestletter->letter;
 						   }
 						}												
 					}
@@ -601,6 +609,14 @@ function tune_library() {
 						if ($lowestletters)
 						{
 						   foreach ($lowestletters as $lowestletter){
+							if ($options['groupnonalphaentries'] == true)
+							{
+								if ($lowestletter->letter < 'A' || $lowestletter->letter > 'Z')
+										$artistletter = '#';
+									else
+										$artistletter = $lowestletter->letter;							
+							}
+							else
 								$artistletter = $lowestletter->letter;
 						   }
 						}			
@@ -662,7 +678,7 @@ function tune_library() {
 						if ($options['oneletter'] == true)
 						{
 							if ($options['useDHTML'] == true)
-								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '#' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$nonartistletter->count." Artists'>#</a> ";
+								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '#' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$nonartistletter->count." Artists'>#</a>";
 							else
 								echo '<a href="?artistletter=' . urlencode('#') . '" title="' . $artistletter->count. ' artists">#</a>';						
 						}					
@@ -672,7 +688,7 @@ function tune_library() {
 						if ($options['oneletter'] == true)
 						{
 							if ($options['useDHTML'] == true)
-								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$artistletter->letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a> ";
+								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$artistletter->letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
 							else
 								echo '<a href="?artistletter=' . urlencode($artistletter->letter) . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
 						}
@@ -704,7 +720,7 @@ function tune_library() {
 					if ($letters['#'][1] > 0)
 					{
 						if ($options['oneletter'] == true)
-							echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '#' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters['#'][1]." Artists'>#</a> ";
+							echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '#' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters['#'][1]." Artists'>#</a>";
 						else
 							echo 'TBD';
 					
@@ -719,13 +735,13 @@ function tune_library() {
 					if (array_key_exists($letter, $letters)) {
 						if($letters[$letter][1] > 0){
 							if ($options['oneletter'] == true)
-								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters[$letter][1]." Artists'>$letter</a> ";
+								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters[$letter][1]." Artists'>$letter</a>";
 							else
 								echo '<a href="#' . $letter . '" title="' . $letters[$letter][1] . ' artists">' . $letter . "</a>";
 						}
 						else
 						{
-							echo "<a href='?letter=".$letter."' title='".$letters[$letter][1]." Artist'>$letter</a> ";
+							echo "<a href='?letter=".$letter."' title='".$letters[$letter][1]." Artist'>$letter</a>";
 						}
 					}
 					else
@@ -738,7 +754,7 @@ function tune_library() {
 			if ($options['oneletter'] == true && $options['useDHTML'] == false && $options['displayshowall'] == true)
 				echo '<a href="?showallartists=true">Show All</a>';
 			else if ($options['oneletter'] == true && $options['useDHTML'] == true && $options['displayshowall'] == true)
-				echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='Show all'>Show All</a> ";
+				echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='Show all'>Show All</a>";
 				
 			echo "<div id='contentLoading' style='display: none;'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></div>";
 

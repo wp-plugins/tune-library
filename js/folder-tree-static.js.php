@@ -166,7 +166,7 @@ if (!function_exists('add_action'))
 			}else{
 				folderImg.src = imageFolder;
 			}
-			menuItems[no].insertBefore(folderImg,aTag);
+			/* menuItems[no].insertBefore(folderImg,aTag); */
 			
 			var tmpParentId = menuItems[no].getAttribute('parentId');
 			if(!tmpParentId)tmpParentId = menuItems[no].tmpParentId;
@@ -336,7 +336,7 @@ if (!function_exists('add_action'))
 				}else{
 					folderImg.src = imageFolder;
 				}
-				menuItems[no].insertBefore(folderImg,aTag);
+				/* menuItems[no].insertBefore(folderImg,aTag); */
 			}	
 		
 		}
