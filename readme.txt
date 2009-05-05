@@ -30,6 +30,7 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+1. 1.3.3: Fix to avoid javascript error on pages that don't have a folder tree
 1. 1.3.2: Changed code around Loading Icon styling
 1. 1.3.1: Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
 1. 1.3: Development version released by mistake
