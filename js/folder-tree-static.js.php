@@ -311,33 +311,35 @@ if (!function_exists('add_action'))
 	
 	function initTree()
 	{
-		
 		for(var treeCounter=0;treeCounter<idOfFolderTrees.length;treeCounter++){
 			var dhtmlgoodies_tree = document.getElementById(idOfFolderTrees[treeCounter]);
-			var menuItems = dhtmlgoodies_tree.getElementsByTagName('LI');	// Get an array of all menu items
-			for(var no=0;no<menuItems.length;no++){					
-				nodeId++;
-				var subItems = menuItems[no].getElementsByTagName('UL');
-				var img = document.createElement('IMG');
-				img.src = imageFolder + plusImage;
-				img.onclick = showHideNode;
-				if(subItems.length==0)img.style.visibility='hidden';else{
-					subItems[0].id = 'tree_ul_' + treeUlCounter;
-					treeUlCounter++;
+			if(undefined != dhtmlgoodies_tree)
+			{
+				var menuItems = dhtmlgoodies_tree.getElementsByTagName('LI');	// Get an array of all menu items
+				for(var no=0;no<menuItems.length;no++){					
+					nodeId++;
+					var subItems = menuItems[no].getElementsByTagName('UL');
+					var img = document.createElement('IMG');
+					img.src = imageFolder + plusImage;
+					img.onclick = showHideNode;
+					if(subItems.length==0)img.style.visibility='hidden';else{
+						subItems[0].id = 'tree_ul_' + treeUlCounter;
+						treeUlCounter++;
+					}
+					var aTag = menuItems[no].getElementsByTagName('A')[0];
+					if(contextMenuActive)aTag.oncontextmenu = showContextMenu;
+					aTag.onclick = showHideNode;
+					menuItems[no].insertBefore(img,aTag);
+					if(!menuItems[no].id)menuItems[no].id = 'dhtmlgoodies_treeNode' + nodeId;
+					var folderImg = document.createElement('IMG');
+					if(menuItems[no].className){
+						folderImg.src = imageFolder + menuItems[no].className;
+					}else{
+						folderImg.src = imageFolder;
+					}
+					/* menuItems[no].insertBefore(folderImg,aTag); */
 				}
-				var aTag = menuItems[no].getElementsByTagName('A')[0];
-				if(contextMenuActive)aTag.oncontextmenu = showContextMenu;
-				aTag.onclick = showHideNode;
-				menuItems[no].insertBefore(img,aTag);
-				if(!menuItems[no].id)menuItems[no].id = 'dhtmlgoodies_treeNode' + nodeId;
-				var folderImg = document.createElement('IMG');
-				if(menuItems[no].className){
-					folderImg.src = imageFolder + menuItems[no].className;
-				}else{
-					folderImg.src = imageFolder;
-				}
-				/* menuItems[no].insertBefore(folderImg,aTag); */
-			}	
+			}
 		
 		}
 		//initExpandedNodes = Get_Cookie('dhtmlgoodies_expandedNodes');
