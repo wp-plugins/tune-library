@@ -472,7 +472,7 @@ function tune_library() {
 	// Guess the location
 		$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
 		
-			echo "<!-- Tune Library Output -->";
+		echo "<!-- Tune Library Output -->";
 		echo "<div id=\"TuneLibrary\">";
 	
 		echo "<SCRIPT LANGUAGE=\"JavaScript\">\n";
@@ -554,6 +554,11 @@ function tune_library() {
 		echo "\t\tthisImg.src = plusImg.src;\n";
 		echo "\t}\n";
 		echo "}\n\n";
+		
+		echo "function showArtistLetter ( _incomingletter) {\n";
+		echo "var map = {letter : _incomingletter}\n";
+		echo "\tjQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', map, function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\n";
+		echo "}\n";
 		
 		echo "</SCRIPT>\n\n";
 		
@@ -678,7 +683,7 @@ function tune_library() {
 						if ($options['oneletter'] == true)
 						{
 							if ($options['useDHTML'] == true)
-								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '#' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$nonartistletter->count." Artists'>#</a>";
+								echo "<a href='#' onClick=\"showArtistLetter('#');\" title='".$nonartistletter->count." Artists'>#</a>";
 							else
 								echo '<a href="?artistletter=' . urlencode('#') . '" title="' . $artistletter->count. ' artists">#</a>';						
 						}					
@@ -688,7 +693,7 @@ function tune_library() {
 						if ($options['oneletter'] == true)
 						{
 							if ($options['useDHTML'] == true)
-								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$artistletter->letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
+								echo "<a href='#' onClick=\"showArtistLetter('" . $artistletter->letter. "');\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
 							else
 								echo '<a href="?artistletter=' . urlencode($artistletter->letter) . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
 						}
@@ -720,7 +725,7 @@ function tune_library() {
 					if ($letters['#'][1] > 0)
 					{
 						if ($options['oneletter'] == true)
-							echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '#' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters['#'][1]." Artists'>#</a>";
+							echo "<a href='#' onClick=\"showArtistLetter('#');\" title='".$letters['#'][1]." Artists'>#</a>";
 						else
 							echo 'TBD';
 					
@@ -735,7 +740,10 @@ function tune_library() {
 					if (array_key_exists($letter, $letters)) {
 						if($letters[$letter][1] > 0){
 							if ($options['oneletter'] == true)
-								echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters[$letter][1]." Artists'>$letter</a>";
+							{
+								echo "<a href='#' onClick=\"showArtistLetter('" . $letter. "');\" title='".$letters[$letter][1]." Artists'>$letter</a>";
+								//echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters[$letter][1]." Artists'>$letter</a>";
+							}
 							else
 								echo '<a href="#' . $letter . '" title="' . $letters[$letter][1] . ' artists">' . $letter . "</a>";
 						}
