@@ -56,9 +56,9 @@
 				
 				echo "<li><a href='#' id='".urlencode('node_'.$count)."'> ".$album->artist."</a>";
 				if ($album->source == "artist")
-					echo "<ul><li parentId=\"artist::".urlencode($album->artist)."\"><a href='#' id='node_2'>Loading...</a></li></ul></li>";
+					echo "<ul><li parentId=\"artist::".urlencode($album->artist)."\"><a href='#' id='node_2'><img src=\"" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "\" style=\"float: left;\" alt=\"Loading data, please wait...\"></a></li></ul></li>";
 				else
-					echo "<ul><li parentId=\"albumartist::".urlencode($album->artist)."\"><a href='#' id='node_2'>Loading...</a></li></ul></li>";
+					echo "<ul><li parentId=\"albumartist::".urlencode($album->artist)."\"><a href='#' id='node_2'><img src=\"" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "\" style=\"float: left;\" alt=\"Loading data, please wait...\"></a></li></ul></li>";
 							
 				$count++;
 					

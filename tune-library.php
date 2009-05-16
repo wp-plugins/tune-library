@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.3.3
+Version: 1.4
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -29,7 +29,6 @@ Author URI: http://yannickcorner.nayanna.biz
 
 
 /*--------INITIAL FUNCTIONS--------------------------------------------------------*/
-
 
 function parseValue( $valueNode, $depth = -1) {
   $valueType = $valueNode->nodeName;
@@ -447,7 +446,7 @@ function tune_library_func($atts) {
 	extract(shortcode_atts(array(
 	), $atts));
 
-	tune_library();
+	return tune_library();
 }
 
 
@@ -472,95 +471,95 @@ function tune_library() {
 	// Guess the location
 		$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
 		
-		echo "<!-- Tune Library Output -->";
-		echo "<div id=\"TuneLibrary\">";
+		$output = "<!-- Tune Library 1.4 Output -->";
+		$output .= "<div id=\"TuneLibrary\">";
 	
-		echo "<SCRIPT LANGUAGE=\"JavaScript\">\n";
-		echo "var plusImg = new Image();\n";
+		$output .= "<SCRIPT LANGUAGE=\"JavaScript\">\n";
+		$output .= "var plusImg = new Image();\n";
 		
 		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-			echo "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
+			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
 		else if ($options['iconcolor'] == 'white')
-			echo "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
+			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
 			
-		echo "var minusImg = new Image()\n";
+		$output .= "var minusImg = new Image()\n";
 		
 		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-			echo "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
+			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
 		else if ($options['iconcolor'] == 'white')
-			echo "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
+			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
 		
-		echo "function showAlbums() {\n";
-		echo "\tif (document.getElementsByTagName)\n";
-		echo "\t\tx = document.getElementsByTagName('div');\n";
-		echo "\telse if (document.all)\n";
-		echo "\t\tx = document.all.tags('div');\n\n";
+		$output .= "function showAlbums() {\n";
+		$output .= "\tif (document.getElementsByTagName)\n";
+		$output .= "\t\tx = document.getElementsByTagName('div');\n";
+		$output .= "\telse if (document.all)\n";
+		$output .= "\t\tx = document.all.tags('div');\n\n";
 		
-		echo "\tfor (var i=0;i<x.length;i++)\n";
-		echo "\t{\n";
-		echo "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
-		echo "\t\t\tx[i].style.display = \"\";\n";
-		echo "\t\t}\n";
-		echo "\t}\n\n";
+		$output .= "\tfor (var i=0;i<x.length;i++)\n";
+		$output .= "\t{\n";
+		$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
+		$output .= "\t\t\tx[i].style.display = \"\";\n";
+		$output .= "\t\t}\n";
+		$output .= "\t}\n\n";
 		
-		echo "\tif (document.getElementsByTagName)\n";
-		echo "\t\tx = document.getElementsByTagName('img');\n";
-		echo "\telse if (document.all)\n";
-		echo "\t\tx = document.all.tags('img');\n\n";
+		$output .= "\tif (document.getElementsByTagName)\n";
+		$output .= "\t\tx = document.getElementsByTagName('img');\n";
+		$output .= "\telse if (document.all)\n";
+		$output .= "\t\tx = document.all.tags('img');\n\n";
 		
-		echo "\tfor (var i=0;i<x.length;i++)\n";
-		echo "\t{\n";
-		echo "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
-		echo "\t\t\tx[i].src = minusImg.src;\n";
-		echo "\t\t}\n";
-		echo "\t}\n";
-		echo "}\n\n";
+		$output .= "\tfor (var i=0;i<x.length;i++)\n";
+		$output .= "\t{\n";
+		$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
+		$output .= "\t\t\tx[i].src = minusImg.src;\n";
+		$output .= "\t\t}\n";
+		$output .= "\t}\n";
+		$output .= "}\n\n";
 		
-		echo "function hideAlbums() {\n";
-		echo "\tif (document.getElementsByTagName)\n";
-		echo "\t\tx = document.getElementsByTagName('div');\n";
-		echo "\telse if (document.all)\n";
-		echo "\t\tx = document.all.tags('div');\n\t";
+		$output .= "function hideAlbums() {\n";
+		$output .= "\tif (document.getElementsByTagName)\n";
+		$output .= "\t\tx = document.getElementsByTagName('div');\n";
+		$output .= "\telse if (document.all)\n";
+		$output .= "\t\tx = document.all.tags('div');\n\t";
 		
-		echo "\tfor (var i=0;i<x.length;i++)\n";
-		echo "\t{\n";
-		echo "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
-		echo "\t\t\tx[i].style.display = \"none\"\n";
-		echo "\t\t}\n";
-		echo "\t}\n\n";
+		$output .= "\tfor (var i=0;i<x.length;i++)\n";
+		$output .= "\t{\n";
+		$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
+		$output .= "\t\t\tx[i].style.display = \"none\"\n";
+		$output .= "\t\t}\n";
+		$output .= "\t}\n\n";
 		
-		echo "\tif (document.getElementsByTagName)\n";
-		echo "\t\tx = document.getElementsByTagName('img');\n";
-		echo "\telse if (document.all)\n";
-		echo "\t\tx = document.all.tags('img');\n\n";
+		$output .= "\tif (document.getElementsByTagName)\n";
+		$output .= "\t\tx = document.getElementsByTagName('img');\n";
+		$output .= "\telse if (document.all)\n";
+		$output .= "\t\tx = document.all.tags('img');\n\n";
 		
-		echo "\tfor (var i=0;i<x.length;i++)\n";
-		echo "\t{\n";
-		echo "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
-		echo "\t\t\tx[i].src = plusImg.src;\n";
-		echo "\t\t}\n";
-		echo "\t}\n";
-		echo "}\n\n";
+		$output .= "\tfor (var i=0;i<x.length;i++)\n";
+		$output .= "\t{\n";
+		$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
+		$output .= "\t\t\tx[i].src = plusImg.src;\n";
+		$output .= "\t\t}\n";
+		$output .= "\t}\n";
+		$output .= "}\n\n";
 		
-		echo "function showLevel( _levelId, _imgId ) {\n";
-		echo "\tvar thisLevel = document.getElementById( _levelId );\n";
-		echo "\tvar thisImg = document.getElementById( _imgId );\n";
-		echo "\tif ( thisLevel.style.display == \"none\") {\n";
-		echo "\t\tthisLevel.style.display = \"\";\n";
-		echo "\t\tthisImg.src = minusImg.src;\n";
-		echo "\t}\n";
-		echo "\telse {\n";
-		echo "\t\tthisLevel.style.display = \"none\";\n";
-		echo "\t\tthisImg.src = plusImg.src;\n";
-		echo "\t}\n";
-		echo "}\n\n";
+		$output .= "function showLevel( _levelId, _imgId ) {\n";
+		$output .= "\tvar thisLevel = document.getElementById( _levelId );\n";
+		$output .= "\tvar thisImg = document.getElementById( _imgId );\n";
+		$output .= "\tif ( thisLevel.style.display == \"none\") {\n";
+		$output .= "\t\tthisLevel.style.display = \"\";\n";
+		$output .= "\t\tthisImg.src = minusImg.src;\n";
+		$output .= "\t}\n";
+		$output .= "\telse {\n";
+		$output .= "\t\tthisLevel.style.display = \"none\";\n";
+		$output .= "\t\tthisImg.src = plusImg.src;\n";
+		$output .= "\t}\n";
+		$output .= "}\n\n";
 		
-		echo "function showArtistLetter ( _incomingletter) {\n";
-		echo "var map = {letter : _incomingletter}\n";
-		echo "\tjQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', map, function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\n";
-		echo "}\n";
+		$output .= "function showArtistLetter ( _incomingletter) {\n";
+		$output .= "var map = {letter : _incomingletter}\n";
+		$output .= "\tjQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', map, function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\n";
+		$output .= "}\n";
 		
-		echo "</SCRIPT>\n\n";
+		$output .= "</SCRIPT>\n\n";
 		
 		
 		
@@ -643,9 +642,9 @@ function tune_library() {
 			// Code for navigation menu at top of page
 			
 			if ($options['oneletter'] == true)
-				echo "\t<div class=LetterSelector>Show Letter ";
+				$output .= "\t<div class=LetterSelector>Show Letter ";
 			else
-				echo "\t<div class=LetterSelector>Jump to Letter ";
+				$output .= "\t<div class=LetterSelector>Jump to Letter ";
 			
 			if (!$options['albumartistpriority'])
 			{
@@ -683,9 +682,9 @@ function tune_library() {
 						if ($options['oneletter'] == true)
 						{
 							if ($options['useDHTML'] == true)
-								echo "<a href='#' onClick=\"showArtistLetter('#');\" title='".$nonartistletter->count." Artists'>#</a>";
+								$output .= "<a href='#' onClick=\"showArtistLetter('#');\" title='".$nonartistletter->count." Artists'>#</a>";
 							else
-								echo '<a href="?artistletter=' . urlencode('#') . '" title="' . $artistletter->count. ' artists">#</a>';						
+								$output .= '<a href="?artistletter=' . urlencode('#') . '" title="' . $artistletter->count. ' artists">#</a>';						
 						}					
 					}
 				
@@ -693,12 +692,12 @@ function tune_library() {
 						if ($options['oneletter'] == true)
 						{
 							if ($options['useDHTML'] == true)
-								echo "<a href='#' onClick=\"showArtistLetter('" . $artistletter->letter. "');\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
+								$output .= "<a href='#' onClick=\"showArtistLetter('" . $artistletter->letter. "');\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
 							else
-								echo '<a href="?artistletter=' . urlencode($artistletter->letter) . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
+								$output .= '<a href="?artistletter=' . urlencode($artistletter->letter) . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
 						}
 						else
-							echo '<a href="#' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
+							$output .= '<a href="#' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
 					}
 				
 				}
@@ -725,50 +724,45 @@ function tune_library() {
 					if ($letters['#'][1] > 0)
 					{
 						if ($options['oneletter'] == true)
-							echo "<a href='#' onClick=\"showArtistLetter('#');\" title='".$letters['#'][1]." Artists'>#</a>";
+							$output .= "<a href='#' onClick=\"showArtistLetter('#');\" title='".$letters['#'][1]." Artists'>#</a>";
 						else
-							echo 'TBD';
+							$output .= '';
 					
 					}
 					else
-						echo '<span class=emptyletter>#</span>';
+						$output .= '<span class=emptyletter>#</span>';
 				}
 				else
-					echo '<span class=emptyletter>#</span>';
+					$output .= '<span class=emptyletter>#</span>';
 	
 				foreach (range('A', 'Z') as $letter) {
 					if (array_key_exists($letter, $letters)) {
 						if($letters[$letter][1] > 0){
-							if ($options['oneletter'] == true)
-							{
-								echo "<a href='#' onClick=\"showArtistLetter('" . $letter. "');\" title='".$letters[$letter][1]." Artists'>$letter</a>";
-								//echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '".$letter."' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='".$letters[$letter][1]." Artists'>$letter</a>";
-							}
-							else
-								echo '<a href="#' . $letter . '" title="' . $letters[$letter][1] . ' artists">' . $letter . "</a>";
-						}
-						else
-						{
-							echo "<a href='?letter=".$letter."' title='".$letters[$letter][1]." Artist'>$letter</a>";
+							if ($options['oneletter'] == true && $options['useDHTML'] == true)
+								$output .= "<a href=\"#\" onClick=\"showArtistLetter('" . $letter. "');\" title='".$letters[$letter][1]." Artists'>$letter</a>";
+							else if ($options['oneletter'] == true && $options['useDHTML'] == false)
+								$output .= '<a href="?artistletter=' . urlencode($letter) . '" title="' . $letters[$letter][1] . ' artists">' . $letter . "</a>";
+							else if ($options['oneletter'] == false)
+								$output .= '<a href="#' . $letter . '" title="' . $letters[$letter][1] . ' artists">' . $letter . "</a>";
 						}
 					}
 					else
 					{
-						echo "<span class=emptyletter>" . $letter . "</span>";
+						$output .= "<span class=emptyletter>" . $letter . "</span>";
 					}
 				}		
 			}
 				
 			if ($options['oneletter'] == true && $options['useDHTML'] == false && $options['displayshowall'] == true)
-				echo '<a href="?showallartists=true">Show All</a>';
+				$output .= '<a href="?showallartists=true">Show All</a>';
 			else if ($options['oneletter'] == true && $options['useDHTML'] == true && $options['displayshowall'] == true)
-				echo "<a href='#' onClick=\"jQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', { letter: '' },function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\" title='Show all'>Show All</a>";
+				$output .= "<a href='#' onClick=\"showArtistLetter('');\" title='Show all'>Show All</a>";
 				
-			echo "<span class='contentLoading' id='contentLoading' style='display: none;'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' alt='Loading data, please wait...'></span>";
+			$output .= "<span class='contentLoading' id='contentLoading' style='display: none;'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' alt='Loading data, please wait...'></span>";
 
-			echo "</div>";
+			$output .= "</div>";
 			
-		echo "\n<ul id=\"dhtmlgoodies_tree\" class=\"dhtmlgoodies_tree\">\n";
+		$output .= "\n<ul id=\"dhtmlgoodies_tree\" class=\"dhtmlgoodies_tree\">\n";
 		$count = 1;
 		
 		$currentletter = '';
@@ -776,16 +770,16 @@ function tune_library() {
        foreach ($albums as $album){
 
 			if ($currentletter != substr($album->artist, 0, 1))
-					echo '<a name="' . substr($album->artist, 0, 1) . '">';
+					$output .= '<a name="' . substr($album->artist, 0, 1) . '">';
 	   
 			if ($options['useDHTML'] == true)
 			{
 	   		
-				echo "<li><a href='#' id='".urlencode('node_'.$count)."'> ".$album->artist."</a>";
+				$output .= "<li><a href=\"#\" id='".urlencode('node_'.$count)."'> ".$album->artist."</a>";
 				if ($album->source == "artist")
-					echo "<ul><li parentId=\"artist::".urlencode($album->artist)."\"><a href='#' id='node_2'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></a></li></ul></li>";
+					$output .= "<ul><li parentId='artist::".urlencode($album->artist)."'><a href='#' id='node_2'><img src=\"" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "\" style=\"float: left;\" alt=\"Loading data, please wait...\"></a></li></ul></li>";
 				else
-					echo "<ul><li parentId=\"albumartist::".urlencode($album->artist)."\"><a href='#' id='node_2'><img src='" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "' style='float: left;' alt='Loading data, please wait...'></a></li></ul></li>";
+					$output .= "<ul><li parentId='albumartist::".urlencode($album->artist)."'><a href='#' id='node_2'><img src=\"" . WP_PLUGIN_URL . "/tune-library/" . $options['loadingicon'] . "\" style=\"float: left;\" alt=\"Loading data, please wait...\"></a></li></ul></li>";
 							
 				$count++;
 					
@@ -794,15 +788,15 @@ function tune_library() {
 			else
 			{	
 			
-				echo "\t<div id=" . substr($album->artist, 0, 1) . "><div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
-				echo "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
+				$output .= "\t<div id=" . substr($album->artist, 0, 1) . "><div class=ArtistHeader>\n<a href=\"javascript:showLevel('Set" . $artistnumber . "','imgSet" . $artistnumber . "');\">\n";
+				$output .= "\t\t<img id=imgSet" . $artistnumber . " border=0 src=\"". $tlpluginpath;
 				
 				if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-					echo "/plusbl.gif\"><b> ";
+					$output .= "/plusbl.gif\"><b> ";
 				else if ($options['iconcolor'] == 'white')
-					echo "/plusbl-white.gif\"><b> ";
+					$output .= "/plusbl-white.gif\"><b> ";
 	 
-				echo $album->artist . "</b></a><br>\n\n";
+				$output .= $album->artist . "</b></a><br>\n\n";
 							
 				if (!$options['albumartistpriority'])
 				{
@@ -827,18 +821,18 @@ function tune_library() {
 				
 				if ($albumslists) {
 				
-					echo "\t\t<div class=AlbumListHeader id=Set" . $artistnumber . " style='display:none'>\n";
+					$output .= "\t\t<div class=AlbumListHeader id=Set" . $artistnumber . " style='display:none'>\n";
 
 				
 					foreach ($albumslists as $albumlist){
-						echo "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
+						$output .= "\t\t\t<div class=AlbumTitle\">\n\t\t\t<a href=\"javascript:showLevel('Album" . $albumnumber . "','imgAlbum" . $albumnumber . "');\">\n\t\t\t<img border=0 id=imgAlbum" . $albumnumber . " class=subImage src=\"" . $tlpluginpath;
 						
 						if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-							echo "/plusbl.gif\">";
+							$output .= "/plusbl.gif\">";
 						else if ($options['iconcolor'] == 'white')
-							echo "/plusbl-white.gif\">";
+							$output .= "/plusbl-white.gif\">";
 						
-						echo "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
+						$output .= "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
 						
 						if (!$options['albumartistpriority'])
 							$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' order by tracknum";
@@ -854,34 +848,34 @@ function tune_library() {
 						
 						if ($tracklists) {
 						
-							echo "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
+							$output .= "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
 							
 							foreach ($tracklists as $tracklist){
 								if (!$options['albumartistpriority'])
 								{
-									echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+									$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
 								}
 								else
 								{
 									if ($album->source == "artist")
-										echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+										$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
 									else
-										echo "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
+										$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
 								}
 							
 							}
 							
-							echo "\t\t\t\t</div>\n";
+							$output .= "\t\t\t\t</div>\n";
 						
 						}
 						
-						echo "\t\t\t</div>\n";
+						$output .= "\t\t\t</div>\n";
 
 						$albumnumber = $albumnumber + 1;
 					
 					}
 					
-					echo "\t\t</div>\n\t</div></div>\n";
+					$output .= "\t\t</div>\n\t</div></div>\n";
 				} 
 				
 			
@@ -893,11 +887,13 @@ function tune_library() {
 			
        }
 	   
-	 echo '</ul>'; 
+	 $output .= '</ul>'; 
 	     
-	 echo "</div>";
+	 $output .= "</div>";
 	   
-	 echo "<!-- Tune Library Output -->";
+	 $output .= "<!-- Tune Library Output -->";
+	 
+	 return $output;
 	   
 }
 

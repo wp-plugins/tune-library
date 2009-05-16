@@ -36,7 +36,7 @@ function sack(file) {
 	};
 
 	this.createAJAX = function() {
-		try {
+/* 		try {
 			this.xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
 		} catch (e1) {
 			try {
@@ -44,7 +44,9 @@ function sack(file) {
 			} catch (e2) {
 				this.xmlhttp = null;
 			}
-		}
+		} */
+		
+		this.xmlhttp = null;
 
 		if (! this.xmlhttp) {
 			if (typeof XMLHttpRequest != "undefined") {
