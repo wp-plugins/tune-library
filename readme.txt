@@ -3,7 +3,7 @@ Contributors: jackdewey
 Donate link: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Tags: iTunes, music, collection, list, XML, AJAX
 Requires at least: 2.7
-Tested up to: 2.7.1
+Tested up to: 2.8
 Stable tag: trunk
 
 The purpose of this plugin is to allow users to import their iTunes music list into Wordpress and print their song collection in a page.
