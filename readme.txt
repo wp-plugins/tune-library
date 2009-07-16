@@ -30,7 +30,8 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
-1. 1.4: Re-architected main function to print output where the link-library shortcode is used on a page. Used to always print output before any page content.
+1. 1.4.1: Added code to correctly load the jquery module. Fixes AJAX mode not working on some installations.
+1. 1.4: Re-architected main function to print output where the tune-library shortcode is used on a page. Used to always print output before any page content.
 1. 1.3.3: Fix to avoid javascript error on pages that don't have a folder tree
 1. 1.3.2: Changed code around Loading Icon styling
 1. 1.3.1: Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
