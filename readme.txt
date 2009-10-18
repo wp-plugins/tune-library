@@ -30,16 +30,40 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
-1. 1.4.1: Added code to correctly load the jquery module. Fixes AJAX mode not working on some installations.
-1. 1.4: Re-architected main function to print output where the tune-library shortcode is used on a page. Used to always print output before any page content.
-1. 1.3.3: Fix to avoid javascript error on pages that don't have a folder tree
-1. 1.3.2: Changed code around Loading Icon styling
-1. 1.3.1: Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
-1. 1.3: Development version released by mistake
-1. 1.2.1: Changed code for default letter shown in filter mode. Was previously hard-coded to A. Now shows appropriate first letter
-1. 1.2: Added new functionality to only show artists whose names start with a single letter at a time to accomodate large collections. Added alphabetical list for regular library display to jump to a specific letter quickly.
-1. 1.1: Changed main function structure to print data directly as it parses track list instead of building large string in memory. This allows Tune Library to support large iTunes libraries.
-1. 1.0.1: Added new option to display black or white expand and collapse icons
+= 1.4.2 =
+* Changed creation of initial table to avoid using file_get_contents
+* Moved admin panel from plugins section to options section
+* Corrected problem with Numeric entries not showing up correctly in AJAX mode when using album artist instead of track artist.
+
+= 1.4.1 = 
+* Added code to correctly load the jquery module. Fixes AJAX mode not working on some installations.
+
+= 1.4 = 
+* Re-architected main function to print output where the tune-library shortcode is used on a page. Used to always print output before any page content.
+
+= 1.3.3 =
+* Fix to avoid javascript error on pages that don't have a folder tree
+
+= 1.3.2 =
+* Changed code around Loading Icon styling
+
+= 1.3.1 = 
+* Added support for AJAX query mode to avoid unnecessary screen refreshes and database queries
+
+= 1.3 =
+* Development version released by mistake
+
+= 1.2.1 =
+* Changed code for default letter shown in filter mode. Was previously hard-coded to A. Now shows appropriate first letter
+
+= 1.2 =
+* Added new functionality to only show artists whose names start with a single letter at a time to accomodate large collections. Added alphabetical list for regular library display to jump to a specific letter quickly.
+
+= 1.1 =
+* Changed main function structure to print data directly as it parses track list instead of building large string in memory. This allows Tune Library to support large iTunes libraries.
+
+= 1.0.1 =
+* Added new option to display black or white expand and collapse icons
 
 == Frequently Asked Questions ==
 

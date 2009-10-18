@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.4.1
+Version: 1.4.2
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -133,7 +133,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 		function add_config_page() {
 			global $wpdb;
 			if ( function_exists('add_submenu_page') ) {
-				add_submenu_page('plugins.php', 'Tune Library for Wordpress', 'Tune Library', 9, basename(__FILE__), array('TL_Admin','config_page'));
+				add_options_page('Tune Library for Wordpress', 'Tune Library', 9, basename(__FILE__), array('TL_Admin','config_page'));
 				add_filter( 'plugin_action_links', array( 'TL_Admin', 'filter_plugin_actions'), 10, 2 );
 				add_filter( 'ozh_adminmenu_icon', array( 'TL_Admin', 'add_ozh_adminmenu_icon' ) );				
 			}
@@ -154,7 +154,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			if ( ! $this_plugin ) $this_plugin = plugin_basename(__FILE__);
 
 			if ( $file == $this_plugin ){
-				$settings_link = '<a href="plugins.php?page=tune-library.php">' . __('Settings') . '</a>';
+				$settings_link = '<a href="options-general.php?page=tune-library.php">' . __('Settings') . '</a>';
 				array_unshift( $links, $settings_link ); // before other links
 			}
 			return $links;
@@ -223,8 +223,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 				$wpdb->get_results($droptrackstable);
 				
 				//remake the new tables
-				$schemafilename = $tlpluginpath . "table_schema.sql";
-				$queryF = file_get_contents($schemafilename);
+				$queryF = "create table PREFIXtracks (title	text not null, artist text, albumartist	text, album	text, trackid int unsigned not null primary key, tracknum int unsigned)";
 				$queryF = str_replace('\t',' ', $queryF);
 				$queryF = str_replace('\n','', $queryF);
 				$queryF = str_replace('\r','', $queryF);
@@ -668,7 +667,7 @@ function tune_library() {
 				else
 				{
 					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z')) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z') order by artist) ) artists group by substring(artist, 1, 1)";			
-					$nonletterquery = "select '#' as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist)) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z') order by artist) ) artists";
+					$nonletterquery = "select '#' as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z')) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z') order by artist) ) artists";
 				}
 			}
 			
