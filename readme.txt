@@ -30,6 +30,9 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+= 1.4.3 =
+* Fixed: Activation problem on servers that do not support short open tags
+
 = 1.4.2 =
 * Changed creation of initial table to avoid using file_get_contents
 * Moved admin panel from plugins section to options section
