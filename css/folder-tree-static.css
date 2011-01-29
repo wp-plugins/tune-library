@@ -1,35 +1,36 @@
 	/* Styles used in DHTML query mode */
 	
-	p{
+	#TuneLibrary p{
 		font-family:arial;
 		
 	}
-	a{
+	#TuneLibrary a{
 		font-family:arial;
 		font-size:1.0em;
 	}
 	
-	.dhtmlgoodies_tree{
+	#TuneLibrary .dhtmlgoodies_tree{
 		margin:0px;
 		padding:0px;
 	}
-	.dhtmlgoodies_tree ul{	/* Sub menu groups */
+	
+	#TuneLibrary .dhtmlgoodies_tree ul{	/* Sub menu groups */
 		margin-left:10px;	/* Left spacing */
 		padding-left:0px;
 		display:none;	/* Initially hide sub nodes */
 	}
-	.dhtmlgoodies_tree li{	/* Nodes */
+	#TuneLibrary .dhtmlgoodies_tree li{	/* Nodes */
 		list-style-type:none;
 		vertical-align:middle;
 		
 	}
-	.dhtmlgoodies_tree li a{	/* Node links */
+	#TuneLibrary .dhtmlgoodies_tree li a{	/* Node links */
 		font-family:arial;
 		font-size:1.0em;
 		padding-left:2px;
 	}
 
-	#contentLoading {
+	#TuneLibrary #contentLoading {
 		margin-top: 16px;
 		padding-left: 10px;
 	}
@@ -37,28 +38,28 @@
 	
 	/* Styles used in regular query mode */
 	
-	.ArtistHeader{
+	#TuneLibrary .ArtistHeader{
 	padding-left:20px;
 	margin: 6px 0px 6px 0px;
 }
 
-.AlbumTitle {
+#TuneLibrary .AlbumTitle {
 	padding-left: 20px;
 	margin: 6px 0px 6px 0px;
 }
 
-.AlbumListHeader {
+#TuneLibrary .AlbumListHeader {
 	padding-left: 20px;
 	margin: 6px 10px 6px 10px;
 }
 
-.TrackList{
+#TuneLibrary .TrackList{
 	padding-left: 20px;
 	margin: 5px 0px 5px 0px;
 }
 
-.LetterSelector a { margin-left: 5px; }
-.emptyletter { margin-left: 5px; }
+#TuneLibrary .LetterSelector a { margin-left: 5px; }
+#TuneLibrary .emptyletter { margin-left: 5px; }
 
 
 #TuneLibrary img { border:0px; padding:0px !important; padding:0;}
