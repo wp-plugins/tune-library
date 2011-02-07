@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.4.4
+Version: 1.5
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -164,6 +164,15 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			global $dlextensions;
 			global $wpdb;
 			
+			// Pre-2.6 compatibility
+				if ( !defined('WP_CONTENT_URL') )
+					define( 'WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
+				if ( !defined('WP_CONTENT_DIR') )
+					define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
+
+				// Guess the location
+				$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
+			
 			if ( isset($_GET['reset']) && $_GET['reset'] == "true") {
 					$options['filename'] = 'iTunes Music Library.xml';
 					$options['albumartistpriority'] = false;
@@ -178,94 +187,90 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 					
 				update_option('TuneLibraryPP',$options);
 			}
-			if ( isset($_GET['flush']) && $_GET['flush'] == "true") {
-				$droptrackstable = "DROP TABLE ". $wpdb->prefix . "tracks";
+			elseif ( isset($_GET['flush']) && $_GET['flush'] == "true") {
+				$droptrackstable = "DELETE FROM ". $wpdb->get_blog_prefix() . "tracks";
 				
 				$wpdb->get_results($droptrackstable);
 
-				echo "Music Data and table deleted";
+				echo "<div id='message' class='updated fade'>Music Data deleted</div>";
 			}
-			if ( isset($_GET['import']) && $_GET['import'] == "true") {
-			
+			elseif ( isset($_POST['importitunes'])) {
 				
-				echo "<div class=\"wrap\">";
+				echo "<div id='message' class='updated fade'>";
 				$options  = get_option('TuneLibraryPP');
 
-				echo "Connecting to MySQL...";
+				$handle = fopen($_FILES['ituneslibfilename']['tmp_name'], "r");
 				
-					// Pre-2.6 compatibility
-					if ( !defined('WP_CONTENT_URL') )
-						define( 'WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
-					if ( !defined('WP_CONTENT_DIR') )
-						define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
+				if ($handle)
+				{
+					$filetoload = $_FILES['ituneslibfilename']['tmp_name'];
+					$xmlDoc = new DOMDocument();
+					$xmlDoc->load($filetoload);
 
-					// Guess the location
-						$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
+					$root = $xmlDoc->documentElement->firstChild;
 
+					while ($root->nodeName == "#text") $root = $root->nextSibling;
 
-				echo "Loading iTunes library file...(" . $tlpluginpath . $options['filename'] . ")<br />\n";
-				$filetoload = $tlpluginpath . $options['filename'];
- 				$xmlDoc = new DOMDocument();
-				$xmlDoc->load($filetoload);
+					//load root tree structure, this contains lib info, the songs database, and the playlists array
+					$docRootValues = parseValue($root,1);
 
-				$root = $xmlDoc->documentElement->firstChild;
+					//get itunes music folder location
+					$libraryRootFolder = $docRootValues['Music Folder'];
 
-				while ($root->nodeName == "#text") $root = $root->nextSibling;
-
-				//load root tree structure, this contains lib info, the songs database, and the playlists array
-				$docRootValues = parseValue($root,1);
-
-				//get itunes music folder location
-				$libraryRootFolder = $docRootValues['Music Folder'];
-		
-				$droptrackstable = "DROP TABLE ". $wpdb->prefix . "tracks";
-				
-				$wpdb->get_results($droptrackstable);
-				
-				//remake the new tables
-				$queryF = "create table PREFIXtracks (title	text not null, artist text, albumartist	text, album	text, trackid int unsigned not null primary key, tracknum int unsigned)";
-				$queryF = str_replace('\t',' ', $queryF);
-				$queryF = str_replace('\n','', $queryF);
-				$queryF = str_replace('\r','', $queryF);
-				$queryF = str_replace('PREFIX',$wpdb->prefix, $queryF);
-				$queryF = explode(";",$queryF);
-				foreach($queryF as $query) {
-					$query = trim($query);
-					if ($query) {
+					//load the track list
+					$songsDict = parseValue($docRootValues['Tracks'],1);
+					$songCount = count($songsDict);
+					$i=0;
+					foreach ($songsDict as $trackElement) {
+						$track = parseValue($trackElement);
+						
+						$track['Location'] = str_replace($libraryRootFolder, '', $track['Location']); //trim file path to root of music folder
+						
+						$query = "INSERT INTO ".$wpdb->prefix."tracks VALUES (";
+						$query.= '"'.mysql_real_escape_string($track['Name']).'", ';
+						$query.= (isset($track['Artist']) ? '"'.mysql_real_escape_string($track['Artist']).'"' : 'NULL') .", ";
+						$query.= (isset($track['Album Artist']) ? '"'.mysql_real_escape_string($track['Album Artist']).'"' : 'NULL') .", ";
+						$query.= (isset($track['Album']) ? '"'.mysql_real_escape_string($track['Album']).'"'  : 'NULL') .", ";
+						$query.= (isset($track['Track Number']) ? $track['Track Number'] : 'NULL') . " ";
+						$query.= ");";
+						
 						$wpdb->get_results($query);
+					
 					}
+					
+					echo "Import Successful";				
 				}
-
-				//load the track list
-				$songsDict = parseValue($docRootValues['Tracks'],1);
-				$songCount = count($songsDict);
-				$i=0;
-				foreach ($songsDict as $trackElement) {
-					$track = parseValue($trackElement);
-					
-					$track['Location'] = str_replace($libraryRootFolder, '', $track['Location']); //trim file path to root of music folder
-					
-					//QUERY STRING: Title, Artist, Album, TrackID, FilePath, FileSize, Total Time, Rating, track number, track count, disc number, disc count, play count, date last played, date added
-					
-					$query = "INSERT INTO ".$wpdb->prefix."tracks VALUES (";
-					$query.= '"'.mysql_real_escape_string($track['Name']).'", ';
-					$query.= (isset($track['Artist']) ? '"'.mysql_real_escape_string($track['Artist']).'"' : 'NULL') .", ";
-					$query.= (isset($track['Album Artist']) ? '"'.mysql_real_escape_string($track['Album Artist']).'"' : 'NULL') .", ";
-					$query.= (isset($track['Album']) ? '"'.mysql_real_escape_string($track['Album']).'"'  : 'NULL') .", ";
-					$query.= $track['Track ID'] .", ";
-					$query.= (isset($track['Track Number']) ? $track['Track Number'] : 'NULL') . " ";
-					$query.= ");";
-					
-					$wpdb->get_results($query);
-				
-				}
-
-				echo "...done\n";
 				
 				echo "</div>";
 
 			}
-			if ( isset($_POST['submit']) ) {
+			elseif (isset($_POST['importcsv'])) {
+				global $wpdb;
+
+				$handle = fopen($_FILES['csvfilename']['tmp_name'], "r");
+
+				if ($handle)
+				{
+					$skiprow = 1;
+	 
+					while (($data = fgetcsv($handle, 5000, ",")) !== FALSE) {
+						$row += 1;
+						if ($skiprow == 1 && $row >= 2)
+							$skiprow = 0;
+
+						if (!$skiprow)
+						{
+							if (count($data) == 5)
+							{
+								$wpdb->insert( $wpdb->get_blog_prefix() . "tracks", array( 'title' => $data[0], 'artist' => $data[1], 'albumartist' => $data[2], 'album' => $data[3], 'tracknum' => $data[4]));
+							}
+						}
+					}
+					
+					echo "<div id='message' class='updated fade'>Import Successful</div>";
+				}
+			}
+			elseif ( isset($_POST['submit']) ) {
 				if (!current_user_can('manage_options')) die(__('You cannot edit the Tune Library for WordPress options.'));
 				check_admin_referer('tunelibrarypp-config');
 				
@@ -297,20 +302,31 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			?>
 			<div class="wrap">
 				<h2>Tune Library Configuration</h2>
-				<form action="" method="post" id="analytics-conf">
+				<form action="" method="post" enctype="multipart/form-data" id="analytics-conf">
+					<input type="hidden" name="MAX_FILE_SIZE" value="10000000" />
 					<table class="form-table" style="width:100%;">
 					<?php
 					if ( function_exists('wp_nonce_field') )
 						wp_nonce_field('tunelibrarypp-config');
 					?>
 					<tr>
-						<th scope="row" valign="top">
-							Name of iTunes Library to import (file should be in same folder as plugin)
+						<th class='tltooltip' title='The iTunes Library files is an XML file where iTunes stores all information about your library contents. To find it, read the following article: http://support.apple.com/kb/ht1660' scope="row" valign="top">
+							Import iTunes Library
 						</th>
-						<td>
-							<input type="text" id="filename" name="filename" size="40" value="<?php echo strval($options['filename']); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;"/>
+						<td class='tltooltip' title='The iTunes Library files is an XML file where iTunes stores all information about your library contents. To find it, read the following article: http://support.apple.com/kb/ht1660'>
+							<input type="file" id="ituneslibfilename" name="ituneslibfilename" size="40" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;"/>
+							<input type="submit" name="importitunes" value="<?php _e('Import iTunes Library', 'link-library'); ?>" />
 						</td>
-					</tr>	
+					</tr>
+					<tr>
+						<th class='tltooltip' title='This import allows you to read in tunes in a file format that follows the import template provided with Tune Library' scope="row" valign="top">
+							CSV Import (<a href='<?php echo $tlpluginpath . "importtemplate.csv"?>'>import template</a>)
+						</th>
+						<td class='tltooltip' title='This import allows you to read in tunes in a file format that follows the import template provided with Tune Library'>
+							<input type="file" id="csvfilename" name="csvfilename" size="40" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;"/>
+							<input type="submit" name="importcsv" value="<?php _e('Import CSV Tune List', 'link-library'); ?>" />
+						</td>
+					</tr>					
 					<tr>
 						<th scope="row" valign="top">
 							Use Album Artist instead of Artist when present
@@ -399,13 +415,6 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 					</tr>	
 					<tr>
 						<th scope="row" valign="top">
-							<a href="?page=tune-library.php&amp;import=true">Import iTunes library</a>
-						</th>
-						<td>
-						</td>
-					</tr>					
-					<tr>
-						<th scope="row" valign="top">
 							<a href="?page=tune-library.php&amp;reset=true">Reset Settings</a>
 						</th>
 						<td>
@@ -417,6 +426,18 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 					
 				</form>
 			</div>
+			
+			<script type="text/javascript">
+			jQuery(document).ready( function($) {			
+				jQuery('.tltooltip').each(function()
+							{
+							$(this).tipTip();
+							}
+					);
+
+			});
+
+		</script>
 			<?php
 
 		} // end config_page()
@@ -948,7 +969,38 @@ function tune_library_header() {
 function tune_library_init() {
 	wp_enqueue_script('ajax', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/ajax.js');
 	wp_enqueue_script('folder-tree-static', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/folder-tree-static.js.php');
-}    
+	wp_enqueue_script('tiptip', get_bloginfo('wpurl').'/wp-content/plugins/tune-library/tiptip/jquery.tipTip.minified.js', "jQuery", "1.0rc3");
+	wp_enqueue_style('tiptipstyle', get_bloginfo('wpurl').'/wp-content/plugins/tune-library/tiptip/tipTip.css');	
+}  
+
+function tl_install() {
+	global $wpdb;
+
+	$charset_collate = '';
+	if ( version_compare(mysql_get_server_info(), '4.1.0', '>=') ) {
+		if (!empty($wpdb->charset)) {
+			$charset_collate .= " DEFAULT CHARACTER SET $wpdb->charset";
+		}
+		if (!empty($wpdb->collate)) {
+			$charset_collate .= " COLLATE $wpdb->collate";
+		}
+	}
+	
+	$wpdb->tltracks = $wpdb->get_blog_prefix() .'tracks';
+
+	$result = $wpdb->query("
+			CREATE TABLE IF NOT EXISTS `$wpdb->tltracks` (
+				`title` text NOT NULL,
+				  `artist` text,
+				  `albumartist` text,
+				  `album` text,
+				  `trackid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `tracknum` int(10) unsigned default NULL,				
+				PRIMARY KEY  (`trackid`)
+				) $charset_collate");			
+				
+	$result = $wpdb->query("ALTER TABLE `" . $wpdb->get_blog_prefix() . "tracks` CHANGE `trackid` `trackid` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT");
+}
 
 // adds the menu item to the admin interface
 add_action('admin_menu', array('TL_Admin','add_config_page'));
@@ -962,4 +1014,6 @@ add_action('wp_head', 'tune_library_header');
 add_shortcode('tune-library', 'tune_library_func');
 
 add_action('init', 'tune_library_init');
+
+register_activation_hook(__FILE__, 'tl_install');
 ?>

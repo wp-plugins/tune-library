@@ -30,6 +30,10 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+= 1.5 =
+* Added ability to browse for and upload iTunes library instead of having to upload the file to server manually
+* Added CSV file import capability
+
 = 1.4.4 =
 * Added distinct styles in stylesheet to avoid conflicts with theme
 
