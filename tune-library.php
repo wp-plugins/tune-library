@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.5
+Version: 1.5.1
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -214,32 +214,24 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 					//load root tree structure, this contains lib info, the songs database, and the playlists array
 					$docRootValues = parseValue($root,1);
 
-					//get itunes music folder location
-					$libraryRootFolder = $docRootValues['Music Folder'];
-
 					//load the track list
 					$songsDict = parseValue($docRootValues['Tracks'],1);
 					$songCount = count($songsDict);
 					$i=0;
 					foreach ($songsDict as $trackElement) {
+						$i++;
 						$track = parseValue($trackElement);
-						
-						$track['Location'] = str_replace($libraryRootFolder, '', $track['Location']); //trim file path to root of music folder
-						
-						$query = "INSERT INTO ".$wpdb->prefix."tracks VALUES (";
-						$query.= '"'.mysql_real_escape_string($track['Name']).'", ';
-						$query.= (isset($track['Artist']) ? '"'.mysql_real_escape_string($track['Artist']).'"' : 'NULL') .", ";
-						$query.= (isset($track['Album Artist']) ? '"'.mysql_real_escape_string($track['Album Artist']).'"' : 'NULL') .", ";
-						$query.= (isset($track['Album']) ? '"'.mysql_real_escape_string($track['Album']).'"'  : 'NULL') .", ";
-						$query.= (isset($track['Track Number']) ? $track['Track Number'] : 'NULL') . " ";
-						$query.= ");";
+
+						$wpdb->insert( $wpdb->get_blog_prefix() . "tracks", array( 'title' => mysql_real_escape_string($track['Name']), 'artist' => mysql_real_escape_string($track['Artist']), 'albumartist' => mysql_real_escape_string($track['Album Artist']), 'album' => mysql_real_escape_string($track['Album']), 'tracknum' => $track['Track Number']));
 						
 						$wpdb->get_results($query);
 					
 					}
 					
-					echo "Import Successful";				
+					echo "Imported " . $i . " Tracks Successfully";				
 				}
+				else
+					echo "File not found";
 				
 				echo "</div>";
 
