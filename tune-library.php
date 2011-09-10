@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.5.1
+Version: 1.5.2
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */

@@ -4,7 +4,7 @@
 	
 	$options  = get_option('TuneLibraryPP');
 	
-	$artistletter = $_GET['letter'];
+	$artistletter = substr($_GET['letter'], 0, 1);
 	
 	if (!$options['albumartistpriority'])
 	{ 
