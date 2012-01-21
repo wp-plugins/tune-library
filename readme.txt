@@ -6,9 +6,7 @@ Requires at least: 2.7
 Tested up to: 3.2.1
 Stable tag: trunk
 
-The purpose of this plugin is to allow users to import their iTunes music list into Wordpress and print their song collection in a page.
-
-Users can choose to only show artists whose names start with a single letter at a time to accomodate large collections. Tune Library also features an AJAX-based query mode to avoid refreshing the page for every query and to only request data when required from the database.
+Import your iTunes music list into Wordpress and display your song collection on any page.
 
 == Description ==
 
