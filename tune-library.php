@@ -195,7 +195,6 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 				echo "<div id='message' class='updated fade'>Music Data deleted</div>";
 			}
 			elseif ( isset($_POST['importitunes'])) {
-				
 				echo "<div id='message' class='updated fade'>";
 				$options  = get_option('TuneLibraryPP');
 
@@ -295,7 +294,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			<div class="wrap">
 				<h2>Tune Library Configuration</h2>
 				<form action="" method="post" enctype="multipart/form-data" id="analytics-conf">
-					<input type="hidden" name="MAX_FILE_SIZE" value="10000000" />
+					<input type="hidden" name="MAX_FILE_SIZE" value="20000000" />
 					<table class="form-table" style="width:100%;">
 					<?php
 					if ( function_exists('wp_nonce_field') )
