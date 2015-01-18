@@ -28,6 +28,9 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+= 1.5.3 =
+* Increased maximum file size for uploads
+
 = 1.5.2 =
 * Addressed security exploit in AJAX loading mode
 

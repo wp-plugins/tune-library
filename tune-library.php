@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.5.2
+Version: 1.5.3
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -130,12 +130,17 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 
 	class TL_Admin {
 
+		function TL_Admin() {
+			// adds the menu item to the admin interface
+			add_action( 'admin_menu', array( $this,'add_config_page' ) );
+		}
+
 		function add_config_page() {
 			global $wpdb;
 			if ( function_exists('add_submenu_page') ) {
-				add_options_page('Tune Library for Wordpress', 'Tune Library', 9, basename(__FILE__), array('TL_Admin','config_page'));
-				add_filter( 'plugin_action_links', array( 'TL_Admin', 'filter_plugin_actions'), 10, 2 );
-				add_filter( 'ozh_adminmenu_icon', array( 'TL_Admin', 'add_ozh_adminmenu_icon' ) );				
+				add_options_page('Tune Library for Wordpress', 'Tune Library', 'manage_options', basename(__FILE__), array( $this, 'config_page' ) );
+				add_filter( 'plugin_action_links', array( $this, 'filter_plugin_actions'), 10, 2 );
+				add_filter( 'ozh_adminmenu_icon', array( $this, 'add_ozh_adminmenu_icon' ) );
 			}
 		} // end add_LL_config_page()
 
@@ -221,10 +226,14 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 						$i++;
 						$track = parseValue($trackElement);
 
-						$wpdb->insert( $wpdb->get_blog_prefix() . "tracks", array( 'title' => mysql_real_escape_string($track['Name']), 'artist' => mysql_real_escape_string($track['Artist']), 'albumartist' => mysql_real_escape_string($track['Album Artist']), 'album' => mysql_real_escape_string($track['Album']), 'tracknum' => $track['Track Number']));
+						$tracktitle = ( isset( $track['Name'] ) ? $track['Name'] : '' );
+						$artist = ( isset( $track['Artist'] ) ? $track['Artist'] : '' );
+						$albumartist = ( isset( $track['Album Artist'] ) ? $track['Album Artist'] : '' );
+						$album = ( isset( $track['Album'] ) ? $track['Album'] : '' );
+						$tracknumber = ( isset( $track['Track Number'] ) ? $track['Track Number'] : '' );
+
+						$wpdb->insert( $wpdb->get_blog_prefix() . "tracks", array( 'title' => sanitize_text_field( $tracktitle ), 'artist' => sanitize_text_field( $artist ), 'albumartist' => sanitize_text_field( $albumartist ), 'album' => sanitize_text_field( $album ), 'tracknum' => intval( $tracknumber ) ) );
 						
-						$wpdb->get_results($query);
-					
 					}
 					
 					echo "Imported " . $i . " Tracks Successfully";				
@@ -237,6 +246,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			}
 			elseif (isset($_POST['importcsv'])) {
 				global $wpdb;
+				$row = 0;
 
 				$handle = fopen($_FILES['csvfilename']['tmp_name'], "r");
 
@@ -294,7 +304,7 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 			<div class="wrap">
 				<h2>Tune Library Configuration</h2>
 				<form action="" method="post" enctype="multipart/form-data" id="analytics-conf">
-					<input type="hidden" name="MAX_FILE_SIZE" value="20000000" />
+					<input type="hidden" name="MAX_FILE_SIZE" value="128000000" />
 					<table class="form-table" style="width:100%;">
 					<?php
 					if ( function_exists('wp_nonce_field') )
@@ -572,17 +582,17 @@ function tune_library() {
 		
 		$output .= "</SCRIPT>\n\n";
 		
-		
+		$albums = '';
 		
  	if (!$options['albumartistpriority'])
 	{ 
 		if ($options['oneletter'] == false || $showallartists == true)
-			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' order by artist";
+			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' order by artist";
 		else
 			{
 				if ($artistletter == '' && $options['defaultlettertodisplay'] == '')
 					{
-						$lowestletterquery = "SELECT min( substring( artist, 1, 1 ) ) as letter FROM " . $wpdb->prefix . "tracks where artist != ''";
+						$lowestletterquery = "SELECT min( substring( artist, 1, 1 ) ) as letter FROM " . $wpdb->get_blog_prefix() . "tracks where artist != ''";
 						$lowestletters = $wpdb->get_results($lowestletterquery);
 						
 						if ($lowestletters)
@@ -604,21 +614,21 @@ function tune_library() {
 					$artistletter = $options['defaultlettertodisplay'];
 					
 				if ($artistletter != '#')
-					$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and artist like '" .$artistletter . "%' order by artist";
+					$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and artist like '" .$artistletter . "%' order by artist";
 				else
-					$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') order by artist";
+					$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') order by artist";
 			}
 		$albums = $wpdb->get_results($querystr);
 	}
 	else
 	{
 		if ($options['oneletter'] == false || $showallartists == true)		
-			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
+			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
 		else
 			{
 				if ($artistletter == '' && $options['defaultlettertodisplay'] == '')
 					{
-						$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->prefix . "tracks where albumartist != '' and artist != albumartist))as FirstGroup";
+						$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->get_blog_prefix() . "tracks where albumartist != '' and artist != albumartist))as FirstGroup";
 						$lowestletters = $wpdb->get_results($lowestletterquery);
 						
 						if ($lowestletters)
@@ -640,15 +650,15 @@ function tune_library() {
 					$artistletter = $options['defaultlettertodisplay'];
 				
 				if ($artistletter != '#')
-					$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%') order by artist";			
+					$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%') order by artist";			
 				else
-					$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->prefix . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') ) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->prefix . "tracks where albumartist is not NULL and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z')) order by artist";			
+					$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') ) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z')) order by artist";			
 			}
 		$albums = $wpdb->get_results($querystr);
 			
 	} 
 
-    if ($albums) {		
+    if ( !empty( $albums ) ) {
 		
 			// Code for navigation menu at top of page
 			
@@ -661,12 +671,13 @@ function tune_library() {
 			{
 				if ($options['groupnonalphaentries'] == false)
 				{
-					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null order by artist) artists group by substring(artist, 1, 1)";
+					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist is not null order by artist) artists group by substring(artist, 1, 1)";
+					$nonletterquery = '';
 				}
 				else
 				{
-					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z') order by artist) artists group by substring(artist, 1, 1)";					
-					$nonletterquery = "select '#' as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') order by artist) artists";
+					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist is not null and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z') order by artist) artists group by substring(artist, 1, 1)";					
+					$nonletterquery = "select '#' as letter, count(substring(artist, 1, 1)) as count from (SELECT distinct artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist is not null and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') order by artist) artists";
 				}
 				
 			}
@@ -674,17 +685,23 @@ function tune_library() {
 			{
 				if ($options['groupnonalphaentries'] == false)
 				{
-					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist order by artist) ) artists group by substring(artist, 1, 1)";			
+					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE albumartist is not null and artist != albumartist order by artist) ) artists group by substring(artist, 1, 1)";
+					$nonletterquery = '';
 				}
 				else
 				{
-					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z')) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z') order by artist) ) artists group by substring(artist, 1, 1)";			
-					$nonletterquery = "select '#' as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->prefix . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z')) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->prefix . "tracks WHERE albumartist is not null and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z') order by artist) ) artists";
+					$letterquery = "select substring(artist, 1, 1) as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z')) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE albumartist is not null and artist != albumartist and (substring(artist, 1, 1) >= 'A' and substring(artist, 1, 1) <= 'Z') order by artist) ) artists group by substring(artist, 1, 1)";			
+					$nonletterquery = "select '#' as letter, count(substring(artist, 1, 1)) as count from ((SELECT distinct artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist is not null and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z')) UNION (SELECT distinct albumartist as artist FROM " . $wpdb->get_blog_prefix() . "tracks WHERE albumartist is not null and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z') order by artist) ) artists";
 				}
 			}
 			
 			$artistletters = $wpdb->get_results($letterquery);
-			$nonletterartists = $wpdb->get_results($nonletterquery);				
+
+	        if ( !empty( $nonletterquery ) ) {
+		        $nonletterartists = $wpdb->get_results($nonletterquery);
+	        } else {
+		        $nonletterartists = '';
+	        }
 				
 			if ($artistletters && $options['buildmenufromitems'] == true)
 				{
@@ -720,8 +737,7 @@ function tune_library() {
 					array_push($letters[strtoupper($letter->letter)], $letter->count);
 				}
 				
-				if ($nonletterartists)
-				{
+				if (!empty( $nonletterartists ) ) {
 					foreach($nonletterartists as $nonletterartist)
 					{
 						$letters['#']=array();
@@ -811,20 +827,20 @@ function tune_library() {
 							
 				if (!$options['albumartistpriority'])
 				{
-					$secondquerystr ="SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE artist = '" . mysql_real_escape_string($album->artist) . "' order by album";
-					$albumslists = $wpdb->get_results($secondquerystr); 
+					$secondquerystr ="SELECT distinct album FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist = '%s' order by album";
+					$albumslists = $wpdb->get_results( $wpdb->prepare( $secondquerystr, $album->artist ) );
 				}
 				else
 				{
 					if ($album->source == "artist")
 					{
-						$secondquerystr = "SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE artist = '" . mysql_real_escape_string($album->artist) . "' and (artist = albumartist or albumartist is NULL) order by album";
-						$albumslists = $wpdb->get_results($secondquerystr); 
+						$secondquerystr = "SELECT distinct album FROM " . $wpdb->get_blog_prefix() . "tracks WHERE artist = '%s' and (artist = albumartist or albumartist is NULL) order by album";
+						$albumslists = $wpdb->get_results( $wpdb->prepare( $secondquerystr, $album->artist ) );
 					}
 					else
 					{
-						$secondquerystr ="SELECT distinct album FROM " . $wpdb->prefix . "tracks WHERE albumartist = '" . mysql_real_escape_string($album->artist) . "' order by album";
-						$albumslists = $wpdb->get_results($secondquerystr); 
+						$secondquerystr ="SELECT distinct album FROM " . $wpdb->get_blog_prefix() . "tracks WHERE albumartist = '%s' order by album";
+						$albumslists = $wpdb->get_results( $wpdb->prepare ( $secondquerystr, $album->artist ) );
 					}
 					
 									
@@ -844,34 +860,45 @@ function tune_library() {
 							$output .= "/plusbl-white.gif\">";
 						
 						$output .= "</a><a href=\"javascript:showLevel('Album" . $albumnumber. "','imgAlbum" . $albumnumber . "');\"><b> " . $albumlist->album . "</b></a><br>\n";
+
+						$tracklists = '';
 						
-						if (!$options['albumartistpriority'])
-							$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' order by tracknum";
+						if (!$options['albumartistpriority']) {
+							$thirdquerystr = "SELECT tracknum, title, artist, \"\" as albumartist from " . $wpdb->get_blog_prefix() . "tracks where album = '%s' order by tracknum";
+							$tracklists = $wpdb->get_results( $wpdb->prepare( $thirdquerystr, $albumlist->album ) );
+						}
+
 						else
 						{
-							if ($album->source == "artist")
-								$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' and artist = '" . $album->artist . "' order by tracknum";
-							else
-								$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->prefix . "tracks where album = '" . mysql_real_escape_string($albumlist->album) . "' and albumartist = '" . $album->artist . "' order by tracknum";
+							if ($album->source == "artist") {
+								$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->get_blog_prefix() . "tracks where album = '%s' and artist = '%s' order by tracknum";
+								$tracklists = $wpdb->get_results( $wpdb->prepare( $thirdquerystr, $albumlist->album, $album->artist ) );
+							} else {
+								$thirdquerystr = "SELECT tracknum, title, artist, albumartist from " . $wpdb->get_blog_prefix() . "tracks where album = '%s' and albumartist = '%s' order by tracknum";
+								$tracklists = $wpdb->get_results( $wpdb->prepare( $thirdquerystr, $albumlist->album, $album->artist ) );
+							}
 						}
-							
-						$tracklists = $wpdb->get_results($thirdquerystr); 
-						
+
 						if ($tracklists) {
 						
 							$output .= "\t\t\t\t<div class=TrackList id=Album" . $albumnumber . " style='position:relative;left:+15px;display:none'>\n";
 							
 							foreach ($tracklists as $tracklist){
+
+								$tracknumber = ( isset( $tracklist->tracknum ) ? $tracklist->tracknum : '' );
+								$tracktitle = ( isset( $tracklist->title ) ? $tracklist->title : '' );
+								$trackartist = ( isset( $tracklist->artist ) ? $tracklist->artist : '' );
+
 								if (!$options['albumartistpriority'])
 								{
-									$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+									$output .= "\t\t\t\t" . $tracknumber . " - " . $tracktitle . "<br />\n";
 								}
 								else
 								{
 									if ($album->source == "artist")
-										$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->title . "<br />\n";
+										$output .= "\t\t\t\t" . $tracknumber . " - " . $tracktitle . "<br />\n";
 									else
-										$output .= "\t\t\t\t" . $tracklist->tracknum . " - " . $tracklist->artist  . " - " . $tracklist->title . "<br />\n";
+										$output .= "\t\t\t\t" . $tracknumber . " - " . $trackartist  . " - " . $tracktitle . "<br />\n";
 								}
 							
 							}
@@ -958,25 +985,23 @@ function tune_library_header() {
 }
 
 function tune_library_init() {
-	wp_enqueue_script('ajax', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/ajax.js');
+	add_action( 'wp_enqueue_scripts', 'tune_library_enqueue_scripts' );
+	add_action( 'admin_enqueue_scripts', 'tune_library_admin_scripts' );
+}
+
+function tune_library_enqueue_scripts() {
+	wp_enqueue_script('ajax', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/ajax.js', 'jquery' );
 	wp_enqueue_script('folder-tree-static', get_bloginfo('wpurl') . '/wp-content/plugins/tune-library/js/folder-tree-static.js.php');
+}
+
+function tune_library_admin_scripts() {
 	wp_enqueue_script('tiptip', get_bloginfo('wpurl').'/wp-content/plugins/tune-library/tiptip/jquery.tipTip.minified.js', "jQuery", "1.0rc3");
-	wp_enqueue_style('tiptipstyle', get_bloginfo('wpurl').'/wp-content/plugins/tune-library/tiptip/tipTip.css');	
-}  
+	wp_enqueue_style('tiptipstyle', get_bloginfo('wpurl').'/wp-content/plugins/tune-library/tiptip/tipTip.css');
+}
 
 function tl_install() {
 	global $wpdb;
 
-	$charset_collate = '';
-	if ( version_compare(mysql_get_server_info(), '4.1.0', '>=') ) {
-		if (!empty($wpdb->charset)) {
-			$charset_collate .= " DEFAULT CHARACTER SET $wpdb->charset";
-		}
-		if (!empty($wpdb->collate)) {
-			$charset_collate .= " COLLATE $wpdb->collate";
-		}
-	}
-	
 	$wpdb->tltracks = $wpdb->get_blog_prefix() .'tracks';
 
 	$result = $wpdb->query("
@@ -988,17 +1013,15 @@ function tl_install() {
 				  `trackid` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `tracknum` int(10) unsigned default NULL,				
 				PRIMARY KEY  (`trackid`)
-				) $charset_collate");			
+				)");
 				
 	$result = $wpdb->query("ALTER TABLE `" . $wpdb->get_blog_prefix() . "tracks` CHANGE `trackid` `trackid` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT");
 }
 
-// adds the menu item to the admin interface
-add_action('admin_menu', array('TL_Admin','add_config_page'));
+global $my_tune_library_admin;
+$my_tune_library_admin = new TL_Admin();
 
 add_filter('query_vars', 'tune_library_queryvars' );
-
-wp_enqueue_script('jquery');
 
 add_action('wp_head', 'tune_library_header');
 
