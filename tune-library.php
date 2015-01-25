@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.5.3
+Version: 1.5.4
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -375,8 +375,8 @@ if ( ! class_exists( 'TL_Admin' ) ) {
 						</th>
 						<td>
 							<select name="iconcolor" id="flatlist" style="width:200px;">
-								<option value="black"<?php if ($options['iconcolor'] == false) { echo ' selected="selected"';} ?>>Black</option>
-								<option value="white"<?php if ($options['iconcolor'] == true) { echo ' selected="selected"';} ?>>White</option>
+								<option value="black"<?php selected( $options['iconcolor'], 'black' ); ?>>Black</option>
+								<option value="white"<?php selected( $options['iconcolor'], 'white' ); ?>>White</option>
 							</select>
 						</td>
 					</tr>					
@@ -695,49 +695,53 @@ function tune_library() {
 				}
 			}
 			
-			$artistletters = $wpdb->get_results($letterquery);
+			$artistletters = $wpdb->get_results( $letterquery );
+	        $nonletterartists = '';
 
 	        if ( !empty( $nonletterquery ) ) {
 		        $nonletterartists = $wpdb->get_results($nonletterquery);
-	        } else {
-		        $nonletterartists = '';
 	        }
 				
-			if ($artistletters && $options['buildmenufromitems'] == true)
+			if ( $artistletters && $options['buildmenufromitems'] == true )
 				{
-					foreach ($nonletterartists as $nonletterartist)
-					{
-						if ($options['oneletter'] == true)
+					if ( isset( $nonletterartists ) && !empty( $nonletterartists ) ) {
+						foreach ($nonletterartists as $nonletterartist)
 						{
-							if ($options['useDHTML'] == true)
-								$output .= "<a href='#' onClick=\"showArtistLetter('#');\" title='".$nonartistletter->count." Artists'>#</a>";
-							else
-								$output .= '<a href="?artistletter=' . urlencode('#') . '" title="' . $artistletter->count. ' artists">#</a>';						
-						}					
-					}
-				
-					foreach ($artistletters as $artistletter){
-						if ($options['oneletter'] == true)
-						{
-							if ($options['useDHTML'] == true)
-								$output .= "<a href='#' onClick=\"showArtistLetter('" . $artistletter->letter. "');\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
-							else
-								$output .= '<a href="?artistletter=' . urlencode($artistletter->letter) . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
+							if ($options['oneletter'] == true)
+							{
+								if ($options['useDHTML'] == true)
+									$output .= "<a href='#' onClick=\"showArtistLetter('#');\" title='".$nonartistletter->count." Artists'>#</a>";
+								else
+									$output .= '<a href="?artistletter=' . urlencode('#') . '" title="' . $artistletter->count. ' artists">#</a>';
+							}
 						}
-						else
-							$output .= '<a href="#' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";	
 					}
-				
+
+					if ( !empty( $artistletters ) ) {
+						foreach ($artistletters as $artistletter){
+							if ($options['oneletter'] == true)
+							{
+								if ($options['useDHTML'] == true)
+									$output .= "<a href='#' onClick=\"showArtistLetter('" . $artistletter->letter. "');\" title='".$artistletter->count." Artists'>" . $artistletter->letter . "</a>";
+								else
+									$output .= '<a href="?artistletter=' . urlencode($artistletter->letter) . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";
+							}
+							else
+								$output .= '<a href="#' . $artistletter->letter . '" title="' . $artistletter->count. ' artists">' . $artistletter->letter . "</a>";
+						}
+					}
 				}
 			else {
 				$letters = array();
-				foreach($artistletters as $letter){
-					$letters[strtoupper($letter->letter)]=array();
-					array_push($letters[strtoupper($letter->letter)], strtoupper($letter->letter));
-					array_push($letters[strtoupper($letter->letter)], $letter->count);
+				if ( $artistletters ) {
+					foreach($artistletters as $letter){
+						$letters[strtoupper($letter->letter)]=array();
+						array_push($letters[strtoupper($letter->letter)], strtoupper($letter->letter));
+						array_push($letters[strtoupper($letter->letter)], $letter->count);
+					}
 				}
 				
-				if (!empty( $nonletterartists ) ) {
+				if ( isset( $nonletterartists ) && !empty( $nonletterartists ) ) {
 					foreach($nonletterartists as $nonletterartist)
 					{
 						$letters['#']=array();
