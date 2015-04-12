@@ -28,6 +28,9 @@ You can see a demonstration of the output of the plugin [here](http://yannickcor
 
 == Changelog ==
 
+= 1.5.5 =
+* Fixed for SQL injection vulnerabilities
+
 = 1.5.4 =
 * Fix issue when checking off 'Group Non-Alphabetic Entries'
 

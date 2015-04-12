@@ -3,7 +3,7 @@
 Plugin Name: Tune Library
 Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
-Version: 1.5.4
+Version: 1.5.5
 Author: Yannick Lefebvre
 Author URI: http://yannickcorner.nayanna.biz
 */
@@ -484,178 +484,177 @@ function tune_library() {
 	$showallartists = get_query_var('showallartists');
 	
 	// Pre-2.6 compatibility
-	if ( !defined('WP_CONTENT_URL') )
+	if ( !defined('WP_CONTENT_URL') ) {
 		define( 'WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
-	if ( !defined('WP_CONTENT_DIR') )
+	} elseif ( !defined('WP_CONTENT_DIR') ) {
 		define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
+	}
 
 	// Guess the location
-		$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
+	$tlpluginpath = WP_CONTENT_URL.'/plugins/'.plugin_basename(dirname(__FILE__)).'/';
+
+	$output = "<!-- Tune Library 1.4 Output -->";
+	$output .= "<div id=\"TuneLibrary\">";
+
+	$output .= "<SCRIPT LANGUAGE=\"JavaScript\">\n";
+	$output .= "var plusImg = new Image();\n";
+
+	if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+		$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
+	else if ($options['iconcolor'] == 'white')
+		$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
+
+	$output .= "var minusImg = new Image()\n";
+
+	if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
+		$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
+	else if ($options['iconcolor'] == 'white')
+		$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
+
+	$output .= "function showAlbums() {\n";
+	$output .= "\tif (document.getElementsByTagName)\n";
+	$output .= "\t\tx = document.getElementsByTagName('div');\n";
+	$output .= "\telse if (document.all)\n";
+	$output .= "\t\tx = document.all.tags('div');\n\n";
+
+	$output .= "\tfor (var i=0;i<x.length;i++)\n";
+	$output .= "\t{\n";
+	$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
+	$output .= "\t\t\tx[i].style.display = \"\";\n";
+	$output .= "\t\t}\n";
+	$output .= "\t}\n\n";
+
+	$output .= "\tif (document.getElementsByTagName)\n";
+	$output .= "\t\tx = document.getElementsByTagName('img');\n";
+	$output .= "\telse if (document.all)\n";
+	$output .= "\t\tx = document.all.tags('img');\n\n";
+
+	$output .= "\tfor (var i=0;i<x.length;i++)\n";
+	$output .= "\t{\n";
+	$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
+	$output .= "\t\t\tx[i].src = minusImg.src;\n";
+	$output .= "\t\t}\n";
+	$output .= "\t}\n";
+	$output .= "}\n\n";
+
+	$output .= "function hideAlbums() {\n";
+	$output .= "\tif (document.getElementsByTagName)\n";
+	$output .= "\t\tx = document.getElementsByTagName('div');\n";
+	$output .= "\telse if (document.all)\n";
+	$output .= "\t\tx = document.all.tags('div');\n\t";
+
+	$output .= "\tfor (var i=0;i<x.length;i++)\n";
+	$output .= "\t{\n";
+	$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
+	$output .= "\t\t\tx[i].style.display = \"none\"\n";
+	$output .= "\t\t}\n";
+	$output .= "\t}\n\n";
+
+	$output .= "\tif (document.getElementsByTagName)\n";
+	$output .= "\t\tx = document.getElementsByTagName('img');\n";
+	$output .= "\telse if (document.all)\n";
+	$output .= "\t\tx = document.all.tags('img');\n\n";
+
+	$output .= "\tfor (var i=0;i<x.length;i++)\n";
+	$output .= "\t{\n";
+	$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
+	$output .= "\t\t\tx[i].src = plusImg.src;\n";
+	$output .= "\t\t}\n";
+	$output .= "\t}\n";
+	$output .= "}\n\n";
+
+	$output .= "function showLevel( _levelId, _imgId ) {\n";
+	$output .= "\tvar thisLevel = document.getElementById( _levelId );\n";
+	$output .= "\tvar thisImg = document.getElementById( _imgId );\n";
+	$output .= "\tif ( thisLevel.style.display == \"none\") {\n";
+	$output .= "\t\tthisLevel.style.display = \"\";\n";
+	$output .= "\t\tthisImg.src = minusImg.src;\n";
+	$output .= "\t}\n";
+	$output .= "\telse {\n";
+	$output .= "\t\tthisLevel.style.display = \"none\";\n";
+	$output .= "\t\tthisImg.src = plusImg.src;\n";
+	$output .= "\t}\n";
+	$output .= "}\n\n";
+
+	$output .= "function showArtistLetter ( _incomingletter) {\n";
+	$output .= "var map = {letter : _incomingletter}\n";
+	$output .= "\tjQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', map, function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\n";
+	$output .= "}\n";
+
+	$output .= "</SCRIPT>\n\n";
+
+	$albums = '';
 		
-		$output = "<!-- Tune Library 1.4 Output -->";
-		$output .= "<div id=\"TuneLibrary\">";
-	
-		$output .= "<SCRIPT LANGUAGE=\"JavaScript\">\n";
-		$output .= "var plusImg = new Image();\n";
-		
-		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl.gif\"\n";
-		else if ($options['iconcolor'] == 'white')
-			$output .= "\tplusImg.src = \"" . $tlpluginpath . "/plusbl-white.gif\"\n";
-			
-		$output .= "var minusImg = new Image()\n";
-		
-		if ($options['iconcolor'] == 'black' || $options['iconcolor'] == '')
-			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl.gif\"\n\n";
-		else if ($options['iconcolor'] == 'white')
-			$output .= "\tminusImg.src = \"" . $tlpluginpath . "/minusbl-white.gif\"\n\n";
-		
-		$output .= "function showAlbums() {\n";
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('div');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('div');\n\n";
-		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
-		$output .= "\t\t\tx[i].style.display = \"\";\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n\n";
-		
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('img');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('img');\n\n";
-		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif (x[i].id.indexOf(\"Set\") != -1) {\n";
-		$output .= "\t\t\tx[i].src = minusImg.src;\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n";
-		$output .= "}\n\n";
-		
-		$output .= "function hideAlbums() {\n";
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('div');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('div');\n\t";
-		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
-		$output .= "\t\t\tx[i].style.display = \"none\"\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n\n";
-		
-		$output .= "\tif (document.getElementsByTagName)\n";
-		$output .= "\t\tx = document.getElementsByTagName('img');\n";
-		$output .= "\telse if (document.all)\n";
-		$output .= "\t\tx = document.all.tags('img');\n\n";
-		
-		$output .= "\tfor (var i=0;i<x.length;i++)\n";
-		$output .= "\t{\n";
-		$output .= "\t\tif ((x[i].id.indexOf(\"Set\") != -1) || (x[i].id.indexOf(\"Album\") != -1)) {\n";
-		$output .= "\t\t\tx[i].src = plusImg.src;\n";
-		$output .= "\t\t}\n";
-		$output .= "\t}\n";
-		$output .= "}\n\n";
-		
-		$output .= "function showLevel( _levelId, _imgId ) {\n";
-		$output .= "\tvar thisLevel = document.getElementById( _levelId );\n";
-		$output .= "\tvar thisImg = document.getElementById( _imgId );\n";
-		$output .= "\tif ( thisLevel.style.display == \"none\") {\n";
-		$output .= "\t\tthisLevel.style.display = \"\";\n";
-		$output .= "\t\tthisImg.src = minusImg.src;\n";
-		$output .= "\t}\n";
-		$output .= "\telse {\n";
-		$output .= "\t\tthisLevel.style.display = \"none\";\n";
-		$output .= "\t\tthisImg.src = plusImg.src;\n";
-		$output .= "\t}\n";
-		$output .= "}\n\n";
-		
-		$output .= "function showArtistLetter ( _incomingletter) {\n";
-		$output .= "var map = {letter : _incomingletter}\n";
-		$output .= "\tjQuery('#contentLoading').toggle();jQuery.get('" . WP_PLUGIN_URL . "/tune-library/tune-library-ajax.php', map, function(data){jQuery('#dhtmlgoodies_tree').replaceWith(data);initTree();jQuery('#contentLoading').toggle();});\n";
-		$output .= "}\n";
-		
-		$output .= "</SCRIPT>\n\n";
-		
-		$albums = '';
-		
- 	if (!$options['albumartistpriority'])
-	{ 
-		if ($options['oneletter'] == false || $showallartists == true)
+ 	if ( !$options['albumartistpriority'] ) {
+
+		if ( $options['oneletter'] == false || $showallartists == true ) {
 			$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' order by artist";
-		else
-			{
-				if ($artistletter == '' && $options['defaultlettertodisplay'] == '')
-					{
-						$lowestletterquery = "SELECT min( substring( artist, 1, 1 ) ) as letter FROM " . $wpdb->get_blog_prefix() . "tracks where artist != ''";
-						$lowestletters = $wpdb->get_results($lowestletterquery);
-						
-						if ($lowestletters)
-						{
-						   foreach ($lowestletters as $lowestletter){
-								if ($options['groupnonalphaentries'] == true)
-								{
-									if ($lowestletter->letter < 'A' || $lowestletter->letter > 'Z')
-										$artistletter = '#';
-									else
-										$artistletter = $lowestletter->letter;
-								}
-								else
-									$artistletter = $lowestletter->letter;
-						   }
-						}												
-					}
-				else if ($artistletter == '' && $options['defaultlettertodisplay'] != '')
-					$artistletter = $options['defaultlettertodisplay'];
-					
-				if ($artistletter != '#')
-					$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and artist like '" .$artistletter . "%' order by artist";
-				else
-					$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') order by artist";
-			}
-		$albums = $wpdb->get_results($querystr);
-	}
-	else
-	{
-		if ($options['oneletter'] == false || $showallartists == true)		
-			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
-		else
-			{
-				if ($artistletter == '' && $options['defaultlettertodisplay'] == '')
-					{
-						$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->get_blog_prefix() . "tracks where albumartist != '' and artist != albumartist))as FirstGroup";
-						$lowestletters = $wpdb->get_results($lowestletterquery);
-						
-						if ($lowestletters)
-						{
-						   foreach ($lowestletters as $lowestletter){
-							if ($options['groupnonalphaentries'] == true)
-							{
-								if ($lowestletter->letter < 'A' || $lowestletter->letter > 'Z')
-										$artistletter = '#';
-									else
-										$artistletter = $lowestletter->letter;							
-							}
+		} else {
+			if ( empty( $artistletter ) && empty( $options['defaultlettertodisplay'] ) ) {
+				$lowestletterquery = 'SELECT min( substring( artist, 1, 1 ) ) as letter FROM ' . $wpdb->get_blog_prefix() . "tracks where artist != ''";
+				$lowestletters = $wpdb->get_results( $lowestletterquery );
+
+				if ( $lowestletters ) {
+				   foreach ( $lowestletters as $lowestletter ) {
+						if ( $options['groupnonalphaentries'] == true ) {
+							if ($lowestletter->letter < 'A' || $lowestletter->letter > 'Z')
+								$artistletter = '#';
 							else
 								$artistletter = $lowestletter->letter;
-						   }
-						}			
-					}
-				else if ($artistletter == '' && $options['defaultlettertodisplay'] != '')
-					$artistletter = $options['defaultlettertodisplay'];
-				
-				if ($artistletter != '#')
-					$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '" . $artistletter . "%') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '" . $artistletter .  "%') order by artist";			
-				else
-					$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') ) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z')) order by artist";			
+						} else {
+							$artistletter = $lowestletter->letter;
+						}
+				   }
+				}
+			} else if ( empty( $artistletter ) && !empty( $options['defaultlettertodisplay'] ) ) {
+				$artistletter = $options['defaultlettertodisplay'];
 			}
-		$albums = $wpdb->get_results($querystr);
-			
+
+			if ( $artistletter != '#' ) {
+				$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and artist like '%s' order by artist";
+				$querystr = $wpdb->prepare( $querystr, $artistletter . '%');
+			} else {
+				$querystr ="SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') order by artist";
+			}
+		}
+
+		$albums = $wpdb->get_results( $querystr );
+	} else {
+		if ( $options['oneletter'] == false || $showallartists == true ) {
+			$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist) order by artist";
+		} else {
+			if ( empty( $artistletter ) && empty( $options['defaultlettertodisplay'] ) ) {
+				$lowestletterquery = "SELECT min( letter ) as letter FROM ((Select substring(artist, 1, 1) as letter from " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist)) UNION (Select substring(albumartist, 1, 1) as letter from " . $wpdb->get_blog_prefix() . "tracks where albumartist != '' and artist != albumartist)) as FirstGroup";
+
+				$lowestletters = $wpdb->get_results( $lowestletterquery );
+
+				if ( $lowestletters ) {
+				   foreach ( $lowestletters as $lowestletter ) {
+						if ( $options['groupnonalphaentries'] == true ) {
+							if ( $lowestletter->letter < 'A' || $lowestletter->letter > 'Z' ) {
+								$artistletter = '#';
+							} else {
+								$artistletter = $lowestletter->letter;
+							}
+						} else {
+							$artistletter = $lowestletter->letter;
+						}
+					}
+				}
+			} else if ($artistletter == '' && $options['defaultlettertodisplay'] != '') {
+				$artistletter = $options['defaultlettertodisplay'];
+			}
+
+				
+			if ($artistletter != '#') {
+				$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and artist like '%s') UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist and albumartist like '%s') order by artist";
+				$querystr = $wpdb->prepare( $querystr, $artistletter . '%', $artistletter . '%' );
+			} else {
+				$querystr ="(SELECT distinct artist, 'artist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where artist != '' and (albumartist is NULL or artist = albumartist) and (substring(artist, 1, 1) < 'A' or substring(artist, 1, 1) > 'Z') ) UNION (SELECT distinct albumartist as artist, 'albumartist' as source FROM " . $wpdb->get_blog_prefix() . "tracks where albumartist is not NULL and artist != albumartist and (substring(albumartist, 1, 1) < 'A' or substring(albumartist, 1, 1) > 'Z')) order by artist";
+			}
+		}
+
+		$albums = $wpdb->get_results( $querystr );
 	} 
 
     if ( !empty( $albums ) ) {
