@@ -1,6 +1,6 @@
 === Tune Library ===
 Contributors: jackdewey
-Donate link: http://yannickcorner.nayanna.biz/wordpress-plugins/tune-library
+Donate link: http://ylefebvre.ca/wordpress-plugins/tune-library
 Tags: iTunes, music, collection, list, XML, AJAX
 Requires at least: 2.7
 Tested up to: 4.2
@@ -12,7 +12,7 @@ Import your iTunes music list into Wordpress and display your song collection on
 
 This plugin is used to import an XML iTunes Music Library file into your Wordpress database. Once imported, you can display a complete listing of your music collection on a page of your Wordpress site.
 
-You can see a demonstration of the output of the plugin [here](http://yannickcorner.nayanna.biz/my-music/).
+You can see a demonstration of the output of the plugin [here](http://ylefebvre.ca/my-music/).
 
 == Installation ==
 

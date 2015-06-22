@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Tune Library
-Plugin URI: http://yannickcorner.nayanna.biz/wordpress-plugins/
+Plugin URI: http://ylefebvre.ca/wordpress-plugins/tune-library
 Description: A plugin that can be used to import an iTunes Library into a MySQl database and display the contents of the collection on a Wordpress Page.
 Version: 1.5.6
 Author: Yannick Lefebvre
-Author URI: http://yannickcorner.nayanna.biz
+Author URI: http://ylefebvre.ca
 */
 
 /*  Copyright 2009  Yannick Lefebvre  (email : ylefebvre@gmail.com)
